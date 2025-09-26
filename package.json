@@ -1,0 +1,45 @@
+{
+  "name": "lynx",
+  "version": "0.1.0",
+  "description": "LYNX - Linked Knowledge Network Explorer: A semantic mapping and visualization platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "db:migrate": "cd apps/web && npm run db:migrate",
+    "db:seed": "cd scripts/ingestion && python seed_database.py",
+    "ingest": "cd scripts/ingestion && python main.py"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.16",
+    "@types/node": "^20.8.0",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bradene0/lynx.git"
+  },
+  "keywords": [
+    "semantic-search",
+    "knowledge-graph",
+    "visualization",
+    "three.js",
+    "embeddings",
+    "next.js"
+  ],
+  "author": "Brad",
+  "license": "MIT"
+}
