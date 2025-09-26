@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar for galaxy theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #533483;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e94560;
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Galaxy canvas container */
+.galaxy-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
+
+/* UI overlay */
+.ui-overlay {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.ui-overlay > * {
+  pointer-events: auto;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Glowing text effect */
+.glow-text {
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* Search input styling */
+.search-input {
+  background: rgba(26, 26, 46, 0.8);
+  border: 1px solid rgba(83, 52, 131, 0.5);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #e94560;
+  box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
+}
+
+/* Button hover effects */
+.btn-primary {
+  background: linear-gradient(135deg, #533483, #e94560);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(233, 69, 96, 0.3);
+}
+
+/* Loading spinner */
+.spinner {
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-left: 2px solid #e94560;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Concept card styling */
+.concept-card {
+  background: rgba(26, 26, 46, 0.9);
+  border: 1px solid rgba(83, 52, 131, 0.3);
+  transition: all 0.3s ease;
+}
+
+.concept-card:hover {
+  border-color: #e94560;
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(233, 69, 96, 0.2);
+}
+
+/* Path visualization */
+.path-line {
+  stroke: #f5af19;
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 5,5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .galaxy-container {
+    height: 100vh;
+  }
+  
+  .ui-overlay {
+    padding: 1rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.focus\:ring-galaxy:focus {
+  outline: none;
+  ring: 2px solid #e94560;
+  ring-offset: 2px;
+  ring-offset-color: #1a1a2e;
+}
