@@ -6,6 +6,7 @@ import { OrbitControls, Stars } from '@react-three/drei';
 import { GalaxyNodes } from './galaxy-nodes';
 import { GalaxyEdges } from './galaxy-edges';
 import { CameraController } from './camera-controller';
+import { LODSystem } from './lod-system';
 import { useGalaxyStore } from '@/stores/galaxy-store';
 import { useGalaxyData } from '@/hooks/use-galaxy-data';
 
@@ -91,9 +92,15 @@ export function GalaxyVisualization() {
       {/* Camera Controller */}
       <CameraController />
 
-      {/* Galaxy Components */}
-      <GalaxyNodes nodes={nodes} selectedNode={selectedNode} nodeClickedRef={nodeClickedRef} />
-      <GalaxyEdges edges={edges} nodes={nodes} />
+      {/* Galaxy Components with LOD */}
+      <LODSystem nodes={nodes} maxNodes={200}>
+        {(visibleNodes) => (
+          <>
+            <GalaxyNodes nodes={visibleNodes} selectedNode={selectedNode} nodeClickedRef={nodeClickedRef} />
+            <GalaxyEdges edges={edges} nodes={visibleNodes} />
+          </>
+        )}
+      </LODSystem>
 
       {/* Camera Controls */}
       <OrbitControls

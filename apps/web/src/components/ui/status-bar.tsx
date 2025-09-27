@@ -12,7 +12,7 @@ export function StatusBar() {
   const { data: status, isLoading } = useQuery({
     queryKey: ['ingestion-status'],
     queryFn: async (): Promise<IngestionStatus> => {
-      const response = await fetch('/api/status');
+      const response = await fetch('/api/ingestion/status');
       if (!response.ok) {
         throw new Error('Failed to fetch status');
       }

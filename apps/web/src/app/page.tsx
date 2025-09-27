@@ -4,6 +4,7 @@ import { ConceptPanel } from '@/components/concept/concept-panel';
 import { StatusBar } from '@/components/ui/status-bar';
 import { GalaxyControls } from '@/components/ui/galaxy-controls';
 import { PlanetTooltip } from '@/components/ui/planet-tooltip';
+import { IngestionProgress } from '@/components/ui/ingestion-progress';
 
 export default function HomePage() {
   return (
@@ -51,6 +52,9 @@ export default function HomePage() {
 
         {/* Planet Tooltip */}
         <PlanetTooltip />
+        
+        {/* Ingestion Progress */}
+        <IngestionProgress />
 
         {/* Bottom Controls */}
         <footer className="absolute bottom-0 right-0 z-20 p-6">

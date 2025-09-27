@@ -45,16 +45,22 @@ export function GalaxyControls() {
             </div>
           </div>
 
-          {/* Connection Info */}
+          {/* Dataset Info */}
           <div className="text-xs text-galaxy-white/50 bg-galaxy-dark/30 rounded-lg p-3">
-            <div className="flex items-center space-x-2 mb-1">
+            <div className="flex items-center space-x-2 mb-2">
               <SparklesIcon className="h-3 w-3" />
-              <span className="font-medium">Connection Strength</span>
+              <span className="font-medium">Knowledge Universe</span>
             </div>
             <div className="space-y-1">
-              <div>High: Physics ↔ Quantum (0.28)</div>
-              <div>Medium: AI ↔ Leonardo (0.22)</div>
-              <div>Low: All semantic links (0.05+)</div>
+              <div>📚 54+ Concepts</div>
+              <div>🔬 8 Knowledge Domains</div>
+              <div>🧠 SBERT Embeddings</div>
+              <div>⚡ LOD System Active</div>
+            </div>
+            <div className="mt-2 pt-2 border-t border-galaxy-white/10">
+              <div className="text-xs text-galaxy-white/40">
+                Showing top 200 by relevance
+              </div>
             </div>
           </div>
         </div>

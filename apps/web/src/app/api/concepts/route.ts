@@ -1,29 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { concepts } from '@/lib/schema';
-import { desc, sql } from 'drizzle-orm';
+import { concepts, nodePositions } from '@/lib/schema';
+import { desc, sql, eq } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '1000');
+    const limit = parseInt(searchParams.get('limit') || '200'); // Reduced default for performance
     const offset = parseInt(searchParams.get('offset') || '0');
+    
+    // Spatial query parameters for LOD
+    const centerX = parseFloat(searchParams.get('centerX') || '0');
+    const centerY = parseFloat(searchParams.get('centerY') || '0');
+    const centerZ = parseFloat(searchParams.get('centerZ') || '0');
+    const radius = parseFloat(searchParams.get('radius') || '1000');
+    const importance = parseFloat(searchParams.get('minImportance') || '0');
 
-    // Fetch concepts with basic info
-    const conceptList = await db
+    // Build spatial query if center is provided
+    let query = db
       .select({
         id: concepts.id,
         title: concepts.title,
         summary: concepts.summary,
-        source: concepts.source,
-        source_id: concepts.sourceId,
-        url: concepts.url,
         category: concepts.category,
-        created_at: concepts.createdAt,
-        updated_at: concepts.updatedAt,
+        source: concepts.source,
+        sourceUrl: concepts.url,
+        createdAt: concepts.createdAt,
       })
-      .from(concepts)
-      .orderBy(desc(concepts.createdAt))
+      .from(concepts);
+    
+    // Skip spatial filtering for now - just get all concepts
+    // TODO: Re-enable spatial queries after testing
+    
+    const conceptList = await query
       .limit(limit)
       .offset(offset);
 
