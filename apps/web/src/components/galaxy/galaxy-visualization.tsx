@@ -64,15 +64,18 @@ export function GalaxyVisualization() {
       } as React.CSSProperties}
       onClick={handleCanvasClick}
     >
-      {/* Enhanced Lighting for 3D Effect */}
-      <ambientLight intensity={0.3} />
+      {/* Enhanced Lighting System */}
+      <ambientLight intensity={0.4} />
       <directionalLight 
         position={[10, 10, 5]} 
-        intensity={0.8} 
+        intensity={1.0} 
         castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
       />
-      <pointLight position={[-10, -10, -5]} intensity={0.4} color="#4A90E2" />
-      <pointLight position={[5, -5, 10]} intensity={0.3} color="#E94560" />
+      <pointLight position={[-10, -10, -5]} intensity={0.5} color="#4A90E2" />
+      <pointLight position={[5, -5, 10]} intensity={0.4} color="#E94560" />
+      <pointLight position={[0, 15, 0]} intensity={0.3} color="#FFD700" />
 
       {/* Background Stars */}
       <Stars
@@ -90,7 +93,7 @@ export function GalaxyVisualization() {
 
       {/* Galaxy Components */}
       <GalaxyNodes nodes={nodes} selectedNode={selectedNode} nodeClickedRef={nodeClickedRef} />
-      <GalaxyEdges edges={edges} nodes={nodes} thresholdLevel="medium" />
+      <GalaxyEdges edges={edges} nodes={nodes} />
 
       {/* Camera Controls */}
       <OrbitControls

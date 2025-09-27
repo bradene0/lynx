@@ -10,6 +10,7 @@ import {
   Float32BufferAttribute,
   ShaderMaterial
 } from 'three';
+import { useGalaxyStore } from '@/stores/galaxy-store';
 
 interface GalaxyEdge {
   id: string;
@@ -30,7 +31,6 @@ interface GalaxyNode {
 interface GalaxyEdgesProps {
   edges: GalaxyEdge[];
   nodes: GalaxyNode[];
-  thresholdLevel?: 'high' | 'medium' | 'low';
 }
 
 // Simple vertex shader for gradients
@@ -53,8 +53,9 @@ const fragmentShader = `
   }
 `;
 
-export function GalaxyEdges({ edges, nodes, thresholdLevel = 'medium' }: GalaxyEdgesProps) {
+export function GalaxyEdges({ edges, nodes }: GalaxyEdgesProps) {
   const materialRef = useRef<ShaderMaterial>(null);
+  const { edgeThreshold } = useGalaxyStore();
   
   const { geometry, material } = useMemo(() => {
     // Filter edges based on threshold level
@@ -64,7 +65,7 @@ export function GalaxyEdges({ edges, nodes, thresholdLevel = 'medium' }: GalaxyE
       'low': 0.05
     };
     
-    const minWeight = thresholdMap[thresholdLevel];
+    const minWeight = thresholdMap[edgeThreshold];
     const visibleEdges = edges.filter(edge => edge.weight >= minWeight);
     
     if (visibleEdges.length === 0 || nodes.length === 0) {
@@ -133,7 +134,7 @@ export function GalaxyEdges({ edges, nodes, thresholdLevel = 'medium' }: GalaxyE
     });
 
     return { geometry, material };
-  }, [edges, nodes, thresholdLevel]);
+  }, [edges, nodes, edgeThreshold]);
   
   // Add subtle animation to the lines
   useFrame((state) => {

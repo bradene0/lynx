@@ -17,17 +17,20 @@ interface GalaxyNode extends Concept {
   color: string;
 }
 
-// Enhanced color mapping for planet-like appearance
+// Enhanced color mapping with richer, more vibrant colors
 const CATEGORY_COLORS = {
-  'Science & Technology': '#00BFFF', // Deep Sky Blue - like a tech planet
-  'History': '#DAA520',              // Goldenrod - like ancient worlds
-  'Arts & Culture': '#FF69B4',       // Hot Pink - vibrant creative energy
-  'Philosophy & Religion': '#8A2BE2', // Blue Violet - mystical
-  'Geography': '#32CD32',            // Lime Green - earth-like
-  'General': '#708090',              // Slate Gray - neutral worlds
-  'Physics': '#FF4500',              // Orange Red - energy
-  'Biology': '#228B22',              // Forest Green - life
-  'Mathematics': '#4169E1',          // Royal Blue - logic
+  'Science & Technology': '#00D4FF', // Bright Cyan - innovation
+  'History': '#FFB000',              // Rich Gold - ancient wisdom
+  'Arts & Culture': '#FF1493',       // Deep Pink - creativity
+  'Philosophy & Religion': '#9932CC', // Dark Orchid - mystical
+  'Geography': '#00FF7F',            // Spring Green - nature
+  'General': '#87CEEB',              // Sky Blue - neutral
+  'Physics': '#FF6347',              // Tomato Red - energy
+  'Biology': '#32CD32',              // Lime Green - life
+  'Mathematics': '#1E90FF',          // Dodger Blue - logic
+  'Computer Science': '#00FFFF',     // Aqua - digital
+  'Medicine': '#DC143C',             // Crimson - health
+  'Engineering': '#FF8C00',          // Dark Orange - construction
 } as const;
 
 export function useGalaxyData() {
@@ -90,25 +93,31 @@ export function useGalaxyData() {
         galaxyData.positions.map(pos => [pos.concept_id, pos])
       );
 
-      // Transform concepts to galaxy nodes
       const galaxyNodes: GalaxyNode[] = galaxyData.concepts
         .map(concept => {
           const position = positionMap.get(concept.id);
           if (!position) return null;
 
-          return {
-            ...concept,
-            position,
-            size: calculateNodeSize(concept),
-            color: getCategoryColor(concept.category),
-          };
+          // Calculate importance based on connections (we'll update this when we have more data)
+        const baseSize = 1.2;
+        const randomVariation = 0.3 + Math.random() * 0.4; // 0.3-0.7 variation
+        const importanceSize = baseSize + randomVariation;
+        
+        const galaxyNode: GalaxyNode = {
+          ...concept,
+          position,
+          size: importanceSize,
+          color: CATEGORY_COLORS[concept.category as keyof typeof CATEGORY_COLORS] || CATEGORY_COLORS['General'],
+        };
+        
+        return galaxyNode;
         })
         .filter((node): node is GalaxyNode => node !== null);
 
       // Transform edges
       const galaxyEdges = galaxyData.edges.map(edge => ({
         ...edge,
-        visible: true,
+        visible: true, // All edges visible by default
       }));
 
       setNodes(galaxyNodes);

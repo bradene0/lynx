@@ -23,32 +23,28 @@ interface GalaxyStore {
   // Data
   nodes: GalaxyNode[];
   edges: GalaxyEdge[];
-  
   // UI State
   selectedNode: string | null;
   hoveredNode: string | null;
   searchResults: string[];
   camera: CameraState;
-  
-  // Loading States
   isLoading: boolean;
   error: string | null;
+  edgeThreshold: 'high' | 'medium' | 'low';
   
   // Actions
   setNodes: (nodes: GalaxyNode[]) => void;
   setEdges: (edges: GalaxyEdge[]) => void;
   selectNode: (nodeId: string | null) => void;
   hoverNode: (nodeId: string | null) => void;
-  setSearchResults: (nodeIds: string[]) => void;
-  highlightSearchResults: (nodeIds: string[]) => void;
-  clearSearchHighlight: () => void;
+  setCameraPosition: (position: [number, number, number]) => void;
   setCameraTarget: (target: [number, number, number]) => void;
-  flyToNode: (nodeId: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setEdgeThreshold: (threshold: 'high' | 'medium' | 'low') => void;
+  flyToNode: (nodeId: string) => void;
   
   // Galaxy Operations
-  highlightPath: (path: string[]) => void;
   showWormholes: (nodeId: string) => void;
   resetView: () => void;
 }
@@ -67,14 +63,15 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
   },
   isLoading: false,
   error: null,
+  edgeThreshold: 'medium',
 
   // Basic Actions
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
   selectNode: (nodeId) => set({ selectedNode: nodeId }),
   hoverNode: (nodeId) => set({ hoveredNode: nodeId }),
-  setSearchResults: (nodeIds) => set({ searchResults: nodeIds }),
-  highlightSearchResults: (nodeIds) => {
+  setSearchResults: (nodeIds: string[]) => set({ searchResults: nodeIds }),
+  highlightSearchResults: (nodeIds: string[]) => {
     console.log('✨ Highlighting nodes:', nodeIds); // Debug log
     set({ searchResults: nodeIds });
     // Update nodes to show highlight state
@@ -96,12 +93,17 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
       }))
     }));
   },
+  setCameraPosition: (position) =>
+    set((state) => ({
+      camera: { ...state.camera, position }
+    })),
   setCameraTarget: (target) => 
     set((state) => ({ 
       camera: { ...state.camera, target } 
     })),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
+  setEdgeThreshold: (threshold) => set({ edgeThreshold: threshold }),
 
   // Advanced Actions
   flyToNode: (nodeId) => {
@@ -139,7 +141,7 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
     }
   },
 
-  highlightPath: (path) => {
+  highlightPath: (path: string[]) => {
     set((state) => ({
       edges: state.edges.map(edge => ({
         ...edge,

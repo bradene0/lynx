@@ -2,6 +2,8 @@ import { GalaxyVisualization } from '@/components/galaxy/galaxy-visualization';
 import { SearchInterface } from '@/components/search/search-interface';
 import { ConceptPanel } from '@/components/concept/concept-panel';
 import { StatusBar } from '@/components/ui/status-bar';
+import { GalaxyControls } from '@/components/ui/galaxy-controls';
+import { PlanetTooltip } from '@/components/ui/planet-tooltip';
 
 export default function HomePage() {
   return (
@@ -42,44 +44,41 @@ export default function HomePage() {
             <StatusBar />
           </div>
         </header>
-
         {/* Concept Detail Panel - Adjusted for new layout */}
         <div className="absolute top-28 right-8 w-[600px] h-[calc(100vh-200px)] z-20">
           <ConceptPanel />
         </div>
 
-        {/* Bottom Controls */}
-        <footer className="absolute bottom-0 left-0 right-0 z-20 p-6">
-          <div className="flex items-center justify-between">
-            {/* Navigation Hints */}
-            <div className="flex items-center space-x-6 text-sm text-galaxy-white/60">
-              <div className="flex items-center space-x-2">
-                <kbd className="px-2 py-1 bg-galaxy-dark/50 rounded text-xs">
-                  /
-                </kbd>
-                <span>Search</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <kbd className="px-2 py-1 bg-galaxy-dark/50 rounded text-xs">
-                  Click
-                </kbd>
-                <span>Select</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <kbd className="px-2 py-1 bg-galaxy-dark/50 rounded text-xs">
-                  Drag
-                </kbd>
-                <span>Navigate</span>
-              </div>
-            </div>
+        {/* Planet Tooltip */}
+        <PlanetTooltip />
 
-            {/* Version Info */}
-            <div className="text-xs text-galaxy-white/40">
-              LYNX v0.1.0 - MVP
+        {/* Bottom Controls */}
+        <footer className="absolute bottom-0 right-0 z-20 p-6">
+          <div className="flex items-center space-x-6 text-sm text-galaxy-white/60">
+            <div className="flex items-center space-x-2">
+              <kbd className="px-2 py-1 bg-galaxy-dark/50 rounded text-xs">
+                Click
+              </kbd>
+              <span>Select planet</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <kbd className="px-2 py-1 bg-galaxy-dark/50 rounded text-xs">
+                Drag
+              </kbd>
+              <span>Rotate view</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <kbd className="px-2 py-1 bg-galaxy-dark/50 rounded text-xs">
+                Scroll
+              </kbd>
+              <span>Zoom</span>
             </div>
           </div>
         </footer>
       </div>
+
+      {/* Galaxy Controls - Outside gradient border */}
+      <GalaxyControls />
     </main>
   );
 }
