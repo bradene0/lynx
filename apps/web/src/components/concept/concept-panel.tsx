@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useGalaxyStore } from '@/stores/galaxy-store';
 import { type ConceptDetail } from '@lynx/shared';
-import { ExternalLinkIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ArrowTopRightOnSquareIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 export function ConceptPanel() {
   const { selectedNode } = useGalaxyStore();
@@ -44,15 +44,15 @@ export function ConceptPanel() {
   if (!conceptDetail) {
     return (
       <div className="glass rounded-xl p-6 h-full flex items-center justify-center">
-        <p className="text-galaxy-white/60">Failed to load concept details</p>
       </div>
     );
   }
 
   return (
-    <div className="glass rounded-xl p-6 h-full overflow-y-auto">
-      {/* Header */}
-      <div className="mb-6">
+    <div className="glass rounded-xl h-full overflow-hidden">
+      <div className="p-8 h-full flex flex-col">
+        {/* Header */}
+        <div className="flex-shrink-0 mb-6">
         <div className="flex items-start justify-between mb-3">
           <h2 className="text-xl font-bold text-galaxy-white glow-text">
             {conceptDetail.concept.title}
@@ -63,7 +63,7 @@ export function ConceptPanel() {
             rel="noopener noreferrer"
             className="text-galaxy-cyan hover:text-galaxy-pink transition-colors"
           >
-            <ExternalLinkIcon className="h-5 w-5" />
+            <ArrowTopRightOnSquareIcon className="h-5 w-5" />
           </a>
         </div>
         
@@ -78,10 +78,14 @@ export function ConceptPanel() {
           )}
         </div>
 
-        <p className="text-galaxy-white/80 text-sm leading-relaxed">
-          {conceptDetail.concept.summary}
-        </p>
-      </div>
+        </div>
+
+        {/* Content - Takes up remaining space */}
+        <div className="flex-1 overflow-y-auto pr-2">
+          <p className="text-galaxy-white/90 text-base leading-relaxed">
+            {conceptDetail.concept.summary}
+          </p>
+        </div>
 
       {/* Wormholes Section */}
       {conceptDetail.wormholes.length > 0 && (
@@ -162,6 +166,7 @@ export function ConceptPanel() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

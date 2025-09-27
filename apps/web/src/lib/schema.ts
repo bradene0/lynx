@@ -1,5 +1,12 @@
-import { pgTable, text, real, timestamp, integer, vector, index, unique } from 'drizzle-orm/pg-core';
+import { pgTable, text, real, timestamp, integer, index, unique, customType } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
+// Custom vector type for pgvector
+const vector = (dimensions: number) => customType<{ data: number[]; driverData: string }>({
+  dataType() {
+    return `vector(${dimensions})`;
+  },
+});
 
 // Concepts table
 export const concepts = pgTable('concepts', {
@@ -21,7 +28,7 @@ export const concepts = pgTable('concepts', {
 export const embeddings = pgTable('embeddings', {
   id: text('id').primaryKey(),
   conceptId: text('concept_id').notNull().references(() => concepts.id, { onDelete: 'cascade' }),
-  embedding: vector('embedding', { dimensions: 384 }).notNull(),
+  embedding: vector(384)('embedding').notNull(),
   model: text('model').notNull().default('text-embedding-3-large'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({

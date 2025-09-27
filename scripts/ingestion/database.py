@@ -219,34 +219,57 @@ class DatabaseManager:
             
         with self.get_connection() as conn:
             with conn.cursor() as cur:
-                # Prepare data for batch insert
-                values = [
-                    (
-                        position['concept_id'],
-                        position['x'],
-                        position['y'],
-                        position['z'],
-                        position.get('cluster_id')
+                if USING_PSYCOPG2:
+                    # Use psycopg2 execute_values
+                    values = [
+                        (
+                            position['concept_id'],
+                            position['x'],
+                            position['y'],
+                            position['z'],
+                            position.get('cluster_id')
+                        )
+                        for position in positions
+                    ]
+                    
+                    execute_values(
+                        cur,
+                        """
+                        INSERT INTO node_positions (concept_id, x, y, z, cluster_id)
+                        VALUES %s
+                        ON CONFLICT (concept_id) DO UPDATE SET
+                            x = EXCLUDED.x,
+                            y = EXCLUDED.y,
+                            z = EXCLUDED.z,
+                            cluster_id = EXCLUDED.cluster_id,
+                            updated_at = NOW()
+                        """,
+                        values,
+                        template=None,
+                        page_size=1000
                     )
-                    for position in positions
-                ]
-                
-                execute_values(
-                    cur,
-                    """
-                    INSERT INTO node_positions (concept_id, x, y, z, cluster_id)
-                    VALUES %s
-                    ON CONFLICT (concept_id) DO UPDATE SET
-                        x = EXCLUDED.x,
-                        y = EXCLUDED.y,
-                        z = EXCLUDED.z,
-                        cluster_id = EXCLUDED.cluster_id,
-                        updated_at = NOW()
-                    """,
-                    values,
-                    template=None,
-                    page_size=1000
-                )
+                else:
+                    # Use psycopg3 executemany
+                    for position in positions:
+                        cur.execute(
+                            """
+                            INSERT INTO node_positions (concept_id, x, y, z, cluster_id)
+                            VALUES (%s, %s, %s, %s, %s)
+                            ON CONFLICT (concept_id) DO UPDATE SET
+                                x = EXCLUDED.x,
+                                y = EXCLUDED.y,
+                                z = EXCLUDED.z,
+                                cluster_id = EXCLUDED.cluster_id,
+                                updated_at = NOW()
+                            """,
+                            (
+                                position['concept_id'],
+                                position['x'],
+                                position['y'],
+                                position['z'],
+                                position.get('cluster_id')
+                            )
+                        )
                 
                 conn.commit()
                 logger.info(f"Inserted/updated {len(positions)} positions")

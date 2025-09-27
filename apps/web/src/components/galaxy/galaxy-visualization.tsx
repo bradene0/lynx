@@ -6,16 +6,33 @@ import { OrbitControls, Stars } from '@react-three/drei';
 import { GalaxyNodes } from './galaxy-nodes';
 import { GalaxyEdges } from './galaxy-edges';
 import { useGalaxyStore } from '@/stores/galaxy-store';
+import { useGalaxyData } from '@/hooks/use-galaxy-data';
 
 export function GalaxyVisualization() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { nodes, edges, selectedNode, camera } = useGalaxyStore();
+  // Re-enable data loading now that database is working
+  const { isLoading, error } = useGalaxyData();
 
-  useEffect(() => {
-    // Initialize galaxy data when component mounts
-    // This will be replaced with actual data loading
-    console.log('Galaxy visualization mounted');
-  }, []);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-galaxy-white">
+          Loading galaxy data...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-red-400">
+          Error loading galaxy: {error ? String(error) : 'Unknown error'}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Canvas

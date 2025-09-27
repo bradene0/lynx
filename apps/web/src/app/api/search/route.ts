@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { concepts, embeddings, nodePositions } from '@/lib/schema';
-import { eq, sql, desc } from 'drizzle-orm';
+import { eq, sql, desc, ilike, or } from 'drizzle-orm';
 import { SearchRequestSchema, type SearchResponse } from '@lynx/shared';
-import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Note: Using text search for now, will implement SBERT similarity search later
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
@@ -32,30 +29,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Generate embedding for the search query
-    const embeddingResponse = await openai.embeddings.create({
-      model: 'text-embedding-3-large',
-      input: validatedInput.query,
-    });
-
-    const queryEmbedding = embeddingResponse.data[0].embedding;
-
-    // Perform vector similarity search
+    // Perform simple text search (will upgrade to SBERT similarity later)
+    const searchTerm = `%${validatedInput.query.toLowerCase()}%`;
+    
     const results = await db
       .select({
         concept: concepts,
         position: nodePositions,
-        similarity: sql<number>`1 - (${embeddings.embedding} <=> ${JSON.stringify(queryEmbedding)}::vector)`,
+        similarity: sql<number>`1.0`, // Placeholder similarity score
       })
       .from(concepts)
-      .innerJoin(embeddings, eq(concepts.id, embeddings.conceptId))
       .leftJoin(nodePositions, eq(concepts.id, nodePositions.conceptId))
       .where(
-        sql`1 - (${embeddings.embedding} <=> ${JSON.stringify(queryEmbedding)}::vector) > ${threshold}`
+        or(
+          ilike(concepts.title, searchTerm),
+          ilike(concepts.summary, searchTerm)
+        )
       )
-      .orderBy(
-        desc(sql`1 - (${embeddings.embedding} <=> ${JSON.stringify(queryEmbedding)}::vector)`)
-      )
+      .orderBy(desc(concepts.createdAt))
       .limit(validatedInput.limit);
 
     const response: SearchResponse = {

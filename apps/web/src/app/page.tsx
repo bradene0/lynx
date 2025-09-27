@@ -32,12 +32,12 @@ export default function HomePage() {
         </header>
 
         {/* Search Interface */}
-        <div className="absolute top-24 left-6 right-6 z-20">
+        <div className="absolute top-24 left-6 right-[650px] z-20">
           <SearchInterface />
         </div>
 
-        {/* Concept Detail Panel */}
-        <div className="absolute top-32 right-6 bottom-6 w-96 z-20">
+        {/* Concept Detail Panel - Fixed positioning for proper height */}
+        <div className="absolute top-32 right-6 w-[600px] h-[calc(100vh-200px)] z-20">
           <ConceptPanel />
         </div>
 
