@@ -70,7 +70,7 @@ export function SearchInterface() {
   }, [searchResults, query, highlightSearchResults, clearSearchHighlight]);
 
   return (
-    <div className="relative max-w-2xl mx-auto">
+    <div className="relative w-full">
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

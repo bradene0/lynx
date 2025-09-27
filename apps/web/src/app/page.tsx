@@ -6,16 +6,23 @@ import { StatusBar } from '@/components/ui/status-bar';
 export default function HomePage() {
   return (
     <main className="relative w-full h-screen overflow-hidden bg-galaxy-black">
-      {/* Galaxy Visualization - Full Screen Background */}
-      <div className="galaxy-container">
-        <GalaxyVisualization />
+      {/* Apple-style Gradient Border - Below Top Bar */}
+      <div className="absolute top-20 left-2 right-2 bottom-2 z-10">
+        <div className="w-full h-full rounded-xl border-2 border-transparent bg-gradient-to-r from-blue-500 via-purple-500 via-pink-400 via-blue-400 to-blue-600 p-[2px] animate-gradient-x">
+          <div className="w-full h-full rounded-xl bg-galaxy-black">
+            {/* Galaxy Visualization - Inside Gradient Border */}
+            <div className="galaxy-container w-full h-full rounded-xl overflow-hidden">
+              <GalaxyVisualization />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* UI Overlay */}
       <div className="ui-overlay">
-        {/* Top Navigation */}
+        {/* Top Navigation - Centered Layout */}
         <header className="absolute top-0 left-0 right-0 z-20 p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center space-x-8">
             {/* Logo */}
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-galaxy-pink to-galaxy-gold rounded-full flex items-center justify-center">
@@ -26,18 +33,18 @@ export default function HomePage() {
               </h1>
             </div>
 
+            {/* Centered Search Interface */}
+            <div className="flex-1 max-w-2xl">
+              <SearchInterface />
+            </div>
+
             {/* Status Indicator */}
             <StatusBar />
           </div>
         </header>
 
-        {/* Search Interface */}
-        <div className="absolute top-24 left-6 right-[650px] z-20">
-          <SearchInterface />
-        </div>
-
-        {/* Concept Detail Panel - Fixed positioning for proper height */}
-        <div className="absolute top-32 right-6 w-[600px] h-[calc(100vh-200px)] z-20">
+        {/* Concept Detail Panel - Adjusted for new layout */}
+        <div className="absolute top-28 right-8 w-[600px] h-[calc(100vh-200px)] z-20">
           <ConceptPanel />
         </div>
 

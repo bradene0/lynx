@@ -52,10 +52,11 @@ export function GalaxyVisualization() {
         far: 10000,
       }}
       style={{
-        width: '100vw',
-        height: '100vh',
+        width: '100%',
+        height: '100%',
         background: 'transparent',
-      }}
+        userSelect: 'none',
+      } as React.CSSProperties}
       onClick={handleCanvasClick}
     >
       {/* Lighting */}
