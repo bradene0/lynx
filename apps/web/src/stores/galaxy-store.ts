@@ -16,6 +16,7 @@ interface CameraState {
   position: [number, number, number];
   target: [number, number, number];
   zoom: number;
+  animating?: boolean;
 }
 
 interface GalaxyStore {
@@ -104,32 +105,37 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
 
   // Advanced Actions
   flyToNode: (nodeId) => {
-    console.log('🌌 FlyToNode called with:', nodeId);
     const { nodes } = get();
-    console.log('🌌 Available nodes:', nodes.map(n => ({ id: n.id, title: n.title })));
     const node = nodes.find(n => n.id === nodeId);
     if (node) {
-      console.log('🌌 Found node:', node.title, 'at position:', node.position);
-      // Calculate camera position offset from the node
-      const offset = 50; // Distance from the node
+      // Calculate smooth camera position offset from the node
+      const offset = 60; // Distance from the node
+      const angle = Math.random() * Math.PI * 2; // Random angle for variety
       const cameraPosition: [number, number, number] = [
-        node.position.x + offset,
-        node.position.y + offset * 0.5,
-        node.position.z + offset
+        node.position.x + Math.cos(angle) * offset,
+        node.position.y + offset * 0.3,
+        node.position.z + Math.sin(angle) * offset
       ];
-      
-      console.log('🌌 Setting camera to:', cameraPosition, 'targeting:', [node.position.x, node.position.y, node.position.z]);
       
       set((state) => ({
         camera: {
           ...state.camera,
           position: cameraPosition,
           target: [node.position.x, node.position.y, node.position.z],
+          animating: true, // Flag for smooth animation
         },
         selectedNode: nodeId,
       }));
-    } else {
-      console.error('🌌 Node not found:', nodeId);
+      
+      // Clear animation flag after animation completes
+      setTimeout(() => {
+        set((state) => ({
+          camera: {
+            ...state.camera,
+            animating: false,
+          }
+        }));
+      }, 1500); // 1.5 second animation
     }
   },
 

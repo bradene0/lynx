@@ -17,16 +17,12 @@ export function GalaxyVisualization() {
   
   // Handle background clicks to deselect nodes
   const handleCanvasClick = (event: any) => {
-    console.log('🌌 Canvas click event:', event);
-    
     // Check if a node was clicked recently
     if (nodeClickedRef.current) {
-      console.log('🌌 Node was clicked - ignoring canvas click');
       nodeClickedRef.current = false; // Reset flag
       return;
     }
     
-    console.log('🌌 Background click - deselecting');
     selectNode(null);
   };
 
@@ -90,7 +86,7 @@ export function GalaxyVisualization() {
 
       {/* Galaxy Components */}
       <GalaxyNodes nodes={nodes} selectedNode={selectedNode} nodeClickedRef={nodeClickedRef} />
-      <GalaxyEdges edges={edges} />
+      <GalaxyEdges edges={edges} nodes={nodes} thresholdLevel="medium" />
 
       {/* Camera Controls */}
       <OrbitControls
@@ -103,6 +99,9 @@ export function GalaxyVisualization() {
         minDistance={10}
         maxDistance={1000}
         target={camera.target}
+        enableDamping={true}
+        dampingFactor={0.05}
+        autoRotate={false}
       />
     </Canvas>
   );

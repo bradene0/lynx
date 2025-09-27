@@ -184,29 +184,23 @@ class DatabaseManager:
         with self.get_connection() as conn:
             with conn.cursor() as cur:
                 # Prepare data for batch insert
-                values = [
-                    (
-                        edge['id'],
-                        edge['source_id'],
-                        edge['target_id'],
-                        edge['weight'],
-                        edge['edge_type']
+                # Insert edges one by one (compatible with both psycopg2 and psycopg3)
+                for edge in edges:
+                    cur.execute(
+                        """
+                        INSERT INTO edges (id, source_id, target_id, weight, edge_type)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (source_id, target_id, edge_type) DO UPDATE SET
+                            weight = EXCLUDED.weight
+                        """,
+                        (
+                            edge['id'],
+                            edge['source_id'],
+                            edge['target_id'],
+                            edge['weight'],
+                            edge['edge_type']
+                        )
                     )
-                    for edge in edges
-                ]
-                
-                execute_values(
-                    cur,
-                    """
-                    INSERT INTO edges (id, source_id, target_id, weight, edge_type)
-                    VALUES %s
-                    ON CONFLICT (source_id, target_id, edge_type) DO UPDATE SET
-                        weight = EXCLUDED.weight
-                    """,
-                    values,
-                    template=None,
-                    page_size=1000
-                )
                 
                 conn.commit()
                 logger.info(f"Inserted/updated {len(edges)} edges")

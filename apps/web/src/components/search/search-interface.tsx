@@ -14,15 +14,11 @@ export function SearchInterface() {
   const { data: searchResults, isLoading, error } = useQuery({
     queryKey: ['search', query],
     queryFn: async (): Promise<SearchResponse> => {
-      console.log('🔍 Searching for:', query);
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&limit=10`);
       if (!response.ok) {
-        console.error('❌ Search API failed:', response.status, response.statusText);
         throw new Error('Search failed');
       }
-      const data = await response.json();
-      console.log('🔍 Search API response:', data);
-      return data;
+      return response.json();
     },
     enabled: query.length > 2,
     staleTime: 30000, // 30 seconds
@@ -39,7 +35,6 @@ export function SearchInterface() {
   }, [clearSearchHighlight]);
 
   const handleSelectResult = useCallback((conceptId: string) => {
-    console.log('🚀 Flying to node:', conceptId);
     flyToNode(conceptId);
     setIsOpen(false);
     setQuery('');
@@ -61,10 +56,8 @@ export function SearchInterface() {
   useEffect(() => {
     if (searchResults && searchResults.results.length > 0) {
       const resultIds = searchResults.results.map(result => result.concept.id);
-      console.log('🔍 Search results:', resultIds); // Debug log
       highlightSearchResults(resultIds);
     } else if (query.length <= 2) {
-      console.log('🔍 Clearing search highlight'); // Debug log
       clearSearchHighlight();
     }
   }, [searchResults, query, highlightSearchResults, clearSearchHighlight]);

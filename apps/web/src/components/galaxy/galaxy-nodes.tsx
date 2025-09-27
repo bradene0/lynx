@@ -109,10 +109,6 @@ export function GalaxyNodes({ nodes, selectedNode, nodeClickedRef }: GalaxyNodes
   });
 
   const handleClick = (event: any) => {
-    console.log('🪐 Node click event:', event);
-    console.log('🪐 Instance ID:', event.instanceId);
-    console.log('🪐 Available nodes:', nodes.length);
-    
     // Set flag to prevent canvas click handler
     nodeClickedRef.current = true;
     
@@ -123,18 +119,13 @@ export function GalaxyNodes({ nodes, selectedNode, nodeClickedRef }: GalaxyNodes
     
     if (instanceId !== undefined && nodes[instanceId]) {
       const clickedNodeId = nodes[instanceId].id;
-      console.log('🪐 Clicking node:', clickedNodeId, nodes[instanceId].title);
       
       // Toggle selection: if already selected, deselect; otherwise select
       if (selectedNode === clickedNodeId) {
-        console.log('🪐 Deselecting node');
         selectNode(null); // Deselect
       } else {
-        console.log('🪐 Selecting node');
         selectNode(clickedNodeId); // Select new node
       }
-    } else {
-      console.log('🪐 No valid node found for instance:', instanceId);
     }
   };
   

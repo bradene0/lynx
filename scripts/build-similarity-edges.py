@@ -135,11 +135,11 @@ class SimilarityEdgeBuilder:
             logger.error("Need at least 2 concepts to build edges")
             return
         
-        # Build edges with different thresholds
+        # Build edges with different thresholds (adjusted for SBERT)
         thresholds = {
-            'high': 0.7,      # Only very similar concepts
-            'medium': 0.5,    # Moderately similar concepts  
-            'low': 0.3        # More exploratory connections
+            'high': 0.25,     # Only very similar concepts (top connections)
+            'medium': 0.15,   # Moderately similar concepts  
+            'low': 0.05       # More exploratory connections
         }
         
         all_edges = []
