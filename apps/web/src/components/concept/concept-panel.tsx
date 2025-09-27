@@ -6,7 +6,7 @@ import { type ConceptDetail } from '@lynx/shared';
 import { ArrowTopRightOnSquareIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 export function ConceptPanel() {
-  const { selectedNode, selectNode } = useGalaxyStore();
+  const { selectedNode, flyToNode } = useGalaxyStore();
 
   const { data: conceptDetail, isLoading } = useQuery({
     queryKey: ['concept', selectedNode],
@@ -144,8 +144,8 @@ export function ConceptPanel() {
                   key={neighbor.concept.id}
                   className="concept-card p-4 rounded-lg cursor-pointer hover:bg-galaxy-cyan/10 transition-colors border border-galaxy-cyan/20"
                   onClick={() => {
-                    // Navigate to connected concept
-                    selectNode(neighbor.concept.id);
+                    // Navigate to connected concept with smooth animation
+                    flyToNode(neighbor.concept.id);
                   }}
                 >
                   <div className="flex items-center justify-between mb-2">

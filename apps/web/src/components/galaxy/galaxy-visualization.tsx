@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { GalaxyNodes } from './galaxy-nodes';
 import { GalaxyEdges } from './galaxy-edges';
+import { CameraController } from './camera-controller';
 import { useGalaxyStore } from '@/stores/galaxy-store';
 import { useGalaxyData } from '@/hooks/use-galaxy-data';
 
@@ -84,15 +85,18 @@ export function GalaxyVisualization() {
         speed={1}
       />
 
+      {/* Camera Controller */}
+      <CameraController />
+
       {/* Galaxy Components */}
       <GalaxyNodes nodes={nodes} selectedNode={selectedNode} nodeClickedRef={nodeClickedRef} />
       <GalaxyEdges edges={edges} nodes={nodes} thresholdLevel="medium" />
 
       {/* Camera Controls */}
       <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
+        enablePan={!camera.animating}
+        enableZoom={!camera.animating}
+        enableRotate={!camera.animating}
         zoomSpeed={0.6}
         panSpeed={0.8}
         rotateSpeed={0.4}

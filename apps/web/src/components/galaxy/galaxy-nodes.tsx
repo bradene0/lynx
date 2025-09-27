@@ -23,7 +23,7 @@ interface GalaxyNodesProps {
 export function GalaxyNodes({ nodes, selectedNode, nodeClickedRef }: GalaxyNodesProps) {
   const meshRef = useRef<InstancedMesh>(null);
   const glowMeshRef = useRef<InstancedMesh>(null);
-  const { hoverNode, selectNode } = useGalaxyStore();
+  const { hoverNode, selectNode, flyToNode } = useGalaxyStore();
   
   const dummy = new Object3D();
   const color = new Color();
@@ -120,11 +120,11 @@ export function GalaxyNodes({ nodes, selectedNode, nodeClickedRef }: GalaxyNodes
     if (instanceId !== undefined && nodes[instanceId]) {
       const clickedNodeId = nodes[instanceId].id;
       
-      // Toggle selection: if already selected, deselect; otherwise select
+      // Toggle selection: if already selected, deselect; otherwise select and fly to
       if (selectedNode === clickedNodeId) {
         selectNode(null); // Deselect
       } else {
-        selectNode(clickedNodeId); // Select new node
+        flyToNode(clickedNodeId); // Select new node with smooth camera animation
       }
     }
   };
