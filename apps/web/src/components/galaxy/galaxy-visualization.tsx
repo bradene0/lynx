@@ -10,16 +10,24 @@ import { useGalaxyData } from '@/hooks/use-galaxy-data';
 
 export function GalaxyVisualization() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const nodeClickedRef = useRef(false);
   const { nodes, edges, selectedNode, camera, selectNode } = useGalaxyStore();
   // Re-enable data loading now that database is working
   const { isLoading, error } = useGalaxyData();
   
   // Handle background clicks to deselect nodes
   const handleCanvasClick = (event: any) => {
-    // Only deselect if clicking on empty space (no intersections)
-    if (event.intersections.length === 0) {
-      selectNode(null);
+    console.log('🌌 Canvas click event:', event);
+    
+    // Check if a node was clicked recently
+    if (nodeClickedRef.current) {
+      console.log('🌌 Node was clicked - ignoring canvas click');
+      nodeClickedRef.current = false; // Reset flag
+      return;
     }
+    
+    console.log('🌌 Background click - deselecting');
+    selectNode(null);
   };
 
   if (isLoading) {
@@ -59,9 +67,15 @@ export function GalaxyVisualization() {
       } as React.CSSProperties}
       onClick={handleCanvasClick}
     >
-      {/* Lighting */}
-      <ambientLight intensity={0.2} />
-      <pointLight position={[10, 10, 10]} intensity={0.5} />
+      {/* Enhanced Lighting for 3D Effect */}
+      <ambientLight intensity={0.3} />
+      <directionalLight 
+        position={[10, 10, 5]} 
+        intensity={0.8} 
+        castShadow
+      />
+      <pointLight position={[-10, -10, -5]} intensity={0.4} color="#4A90E2" />
+      <pointLight position={[5, -5, 10]} intensity={0.3} color="#E94560" />
 
       {/* Background Stars */}
       <Stars
@@ -75,7 +89,7 @@ export function GalaxyVisualization() {
       />
 
       {/* Galaxy Components */}
-      <GalaxyNodes nodes={nodes} selectedNode={selectedNode} />
+      <GalaxyNodes nodes={nodes} selectedNode={selectedNode} nodeClickedRef={nodeClickedRef} />
       <GalaxyEdges edges={edges} />
 
       {/* Camera Controls */}

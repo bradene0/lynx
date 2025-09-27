@@ -17,14 +17,17 @@ interface GalaxyNode extends Concept {
   color: string;
 }
 
-// Color mapping for different categories
+// Enhanced color mapping for planet-like appearance
 const CATEGORY_COLORS = {
-  'Science & Technology': '#00D4FF', // Cyan
-  'History': '#FFB800',              // Gold
-  'Arts & Culture': '#FF6B9D',       // Pink
-  'Philosophy & Religion': '#9B59B6', // Purple
-  'Geography': '#2ECC71',            // Green
-  'General': '#95A5A6',              // Gray
+  'Science & Technology': '#00BFFF', // Deep Sky Blue - like a tech planet
+  'History': '#DAA520',              // Goldenrod - like ancient worlds
+  'Arts & Culture': '#FF69B4',       // Hot Pink - vibrant creative energy
+  'Philosophy & Religion': '#8A2BE2', // Blue Violet - mystical
+  'Geography': '#32CD32',            // Lime Green - earth-like
+  'General': '#708090',              // Slate Gray - neutral worlds
+  'Physics': '#FF4500',              // Orange Red - energy
+  'Biology': '#228B22',              // Forest Green - life
+  'Mathematics': '#4169E1',          // Royal Blue - logic
 } as const;
 
 export function useGalaxyData() {

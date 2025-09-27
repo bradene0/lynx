@@ -17,9 +17,10 @@ interface GalaxyNode {
 interface GalaxyNodesProps {
   nodes: GalaxyNode[];
   selectedNode: string | null;
+  nodeClickedRef: React.MutableRefObject<boolean>;
 }
 
-export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
+export function GalaxyNodes({ nodes, selectedNode, nodeClickedRef }: GalaxyNodesProps) {
   const meshRef = useRef<InstancedMesh>(null);
   const glowMeshRef = useRef<InstancedMesh>(null);
   const { hoverNode, selectNode } = useGalaxyStore();
@@ -28,12 +29,16 @@ export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
   const color = new Color();
   const glowColor = new Color();
 
-  useFrame(() => {
+  useFrame((state) => {
     if (!meshRef.current) return;
 
     // Update each instance
     nodes.forEach((node, index) => {
       dummy.position.set(node.position.x, node.position.y, node.position.z);
+      
+      // Add subtle rotation for planet-like effect
+      dummy.rotation.y = state.clock.elapsedTime * 0.1 + index * 0.1;
+      dummy.rotation.x = Math.sin(state.clock.elapsedTime * 0.05 + index) * 0.1;
       
       // Scale based on selection/hover/highlight state
       const isSelected = selectedNode === node.id;
@@ -43,7 +48,9 @@ export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
       
       let scale = node.size;
       if (isSelected) {
-        scale *= 1.5; // Selected nodes are largest
+        // Add pulsing effect to selected nodes
+        const pulse = 1 + Math.sin(state.clock.elapsedTime * 3) * 0.1;
+        scale *= 1.5 * pulse; // Selected nodes are largest with pulse
       } else if (isHighlighted) {
         scale *= 1.2; // Highlighted nodes are slightly larger
       }
@@ -102,16 +109,32 @@ export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
   });
 
   const handleClick = (event: any) => {
+    console.log('🪐 Node click event:', event);
+    console.log('🪐 Instance ID:', event.instanceId);
+    console.log('🪐 Available nodes:', nodes.length);
+    
+    // Set flag to prevent canvas click handler
+    nodeClickedRef.current = true;
+    
+    // Stop event propagation
     event.stopPropagation();
+    
     const instanceId = event.instanceId;
+    
     if (instanceId !== undefined && nodes[instanceId]) {
       const clickedNodeId = nodes[instanceId].id;
+      console.log('🪐 Clicking node:', clickedNodeId, nodes[instanceId].title);
+      
       // Toggle selection: if already selected, deselect; otherwise select
       if (selectedNode === clickedNodeId) {
+        console.log('🪐 Deselecting node');
         selectNode(null); // Deselect
       } else {
+        console.log('🪐 Selecting node');
         selectNode(clickedNodeId); // Select new node
       }
+    } else {
+      console.log('🪐 No valid node found for instance:', instanceId);
     }
   };
   
@@ -148,8 +171,13 @@ export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <sphereGeometry args={[1, 16, 16]} />
-        <meshPhongMaterial />
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshStandardMaterial 
+          metalness={0.3}
+          roughness={0.4}
+          emissive={0x111111}
+          emissiveIntensity={0.1}
+        />
       </instancedMesh>
       
       {/* Glow effect spheres */}
