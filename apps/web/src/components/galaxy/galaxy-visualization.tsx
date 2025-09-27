@@ -10,9 +10,17 @@ import { useGalaxyData } from '@/hooks/use-galaxy-data';
 
 export function GalaxyVisualization() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { nodes, edges, selectedNode, camera } = useGalaxyStore();
+  const { nodes, edges, selectedNode, camera, selectNode } = useGalaxyStore();
   // Re-enable data loading now that database is working
   const { isLoading, error } = useGalaxyData();
+  
+  // Handle background clicks to deselect nodes
+  const handleCanvasClick = (event: any) => {
+    // Only deselect if clicking on empty space (no intersections)
+    if (event.intersections.length === 0) {
+      selectNode(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -48,6 +56,7 @@ export function GalaxyVisualization() {
         height: '100vh',
         background: 'transparent',
       }}
+      onClick={handleCanvasClick}
     >
       {/* Lighting */}
       <ambientLight intensity={0.2} />

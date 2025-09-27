@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useGalaxyStore } from '@/stores/galaxy-store';
@@ -9,16 +9,20 @@ import { type SearchResponse } from '@lynx/shared';
 export function SearchInterface() {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const { setSearchResults, flyToNode } = useGalaxyStore();
+  const { highlightSearchResults, clearSearchHighlight, flyToNode } = useGalaxyStore();
 
-  const { data: searchResults, isLoading } = useQuery({
+  const { data: searchResults, isLoading, error } = useQuery({
     queryKey: ['search', query],
     queryFn: async (): Promise<SearchResponse> => {
+      console.log('🔍 Searching for:', query);
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&limit=10`);
       if (!response.ok) {
+        console.error('❌ Search API failed:', response.status, response.statusText);
         throw new Error('Search failed');
       }
-      return response.json();
+      const data = await response.json();
+      console.log('🔍 Search API response:', data);
+      return data;
     },
     enabled: query.length > 2,
     staleTime: 30000, // 30 seconds
@@ -30,21 +34,40 @@ export function SearchInterface() {
       setIsOpen(true);
     } else {
       setIsOpen(false);
+      clearSearchHighlight();
     }
-  }, []);
+  }, [clearSearchHighlight]);
 
   const handleSelectResult = useCallback((conceptId: string) => {
+    console.log('🚀 Flying to node:', conceptId);
     flyToNode(conceptId);
     setIsOpen(false);
     setQuery('');
-  }, [flyToNode]);
+    // Delay clearing highlight so user can see the golden effect
+    setTimeout(() => {
+      clearSearchHighlight();
+    }, 2000); // Keep highlight for 2 seconds
+  }, [flyToNode, clearSearchHighlight]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       setIsOpen(false);
       setQuery('');
+      clearSearchHighlight();
     }
-  }, []);
+  }, [clearSearchHighlight]);
+
+  // Highlight search results in the galaxy when they arrive
+  useEffect(() => {
+    if (searchResults && searchResults.results.length > 0) {
+      const resultIds = searchResults.results.map(result => result.concept.id);
+      console.log('🔍 Search results:', resultIds); // Debug log
+      highlightSearchResults(resultIds);
+    } else if (query.length <= 2) {
+      console.log('🔍 Clearing search highlight'); // Debug log
+      clearSearchHighlight();
+    }
+  }, [searchResults, query, highlightSearchResults, clearSearchHighlight]);
 
   return (
     <div className="relative max-w-2xl mx-auto">

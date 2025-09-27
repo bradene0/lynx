@@ -7,9 +7,11 @@ import { useGalaxyStore } from '@/stores/galaxy-store';
 
 interface GalaxyNode {
   id: string;
+  title: string;
   position: { x: number; y: number; z: number };
   size: number;
   color: string;
+  highlighted?: boolean;
 }
 
 interface GalaxyNodesProps {
@@ -19,10 +21,12 @@ interface GalaxyNodesProps {
 
 export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
   const meshRef = useRef<InstancedMesh>(null);
+  const glowMeshRef = useRef<InstancedMesh>(null);
   const { hoverNode, selectNode } = useGalaxyStore();
   
   const dummy = new Object3D();
   const color = new Color();
+  const glowColor = new Color();
 
   useFrame(() => {
     if (!meshRef.current) return;
@@ -31,25 +35,69 @@ export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
     nodes.forEach((node, index) => {
       dummy.position.set(node.position.x, node.position.y, node.position.z);
       
-      // Scale based on selection/hover state
+      // Scale based on selection/hover/highlight state
       const isSelected = selectedNode === node.id;
-      const scale = isSelected ? node.size * 1.5 : node.size;
-      dummy.scale.setScalar(scale);
+      const isHighlighted = node.highlighted;
       
+      // Visual feedback for highlighted nodes
+      
+      let scale = node.size;
+      if (isSelected) {
+        scale *= 1.5; // Selected nodes are largest
+      } else if (isHighlighted) {
+        scale *= 1.2; // Highlighted nodes are slightly larger
+      }
+      
+      dummy.scale.setScalar(scale);
       dummy.updateMatrix();
       meshRef.current!.setMatrixAt(index, dummy.matrix);
       
-      // Set color
+      // Set color - keep original color, don't change it
       color.set(node.color);
-      if (isSelected) {
-        color.multiplyScalar(1.5); // Brighten selected nodes
-      }
+      
+      // Note: Glow effect will be handled by separate glow spheres
+      // Keep the original node color intact
+      
       meshRef.current!.setColorAt(index, color);
+      
+      // Update glow spheres
+      if (glowMeshRef.current) {
+        if (isSelected || isHighlighted) {
+          // Position glow sphere at same location but larger and softer
+          dummy.scale.setScalar(scale * 2.5); // Bigger, softer glow
+          dummy.updateMatrix();
+          glowMeshRef.current.setMatrixAt(index, dummy.matrix);
+          
+          // Set glow color - much more subtle
+          if (isSelected) {
+            glowColor.set('#87CEEB'); // Soft sky blue for selected
+          } else if (isHighlighted) {
+            glowColor.set('#FFD700'); // Gold for highlighted
+          }
+          glowColor.multiplyScalar(0.15); // Much more subtle
+          glowMeshRef.current.setColorAt(index, glowColor);
+        } else {
+          // No glow - make it invisible
+          dummy.scale.setScalar(0.001); // Almost invisible
+          dummy.updateMatrix();
+          glowMeshRef.current.setMatrixAt(index, dummy.matrix);
+          glowColor.set('#000000');
+          glowColor.multiplyScalar(0);
+          glowMeshRef.current.setColorAt(index, glowColor);
+        }
+      }
     });
 
     meshRef.current.instanceMatrix.needsUpdate = true;
     if (meshRef.current.instanceColor) {
       meshRef.current.instanceColor.needsUpdate = true;
+    }
+    
+    if (glowMeshRef.current) {
+      glowMeshRef.current.instanceMatrix.needsUpdate = true;
+      if (glowMeshRef.current.instanceColor) {
+        glowMeshRef.current.instanceColor.needsUpdate = true;
+      }
     }
   });
 
@@ -57,8 +105,19 @@ export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
     event.stopPropagation();
     const instanceId = event.instanceId;
     if (instanceId !== undefined && nodes[instanceId]) {
-      selectNode(nodes[instanceId].id);
+      const clickedNodeId = nodes[instanceId].id;
+      // Toggle selection: if already selected, deselect; otherwise select
+      if (selectedNode === clickedNodeId) {
+        selectNode(null); // Deselect
+      } else {
+        selectNode(clickedNodeId); // Select new node
+      }
     }
+  };
+  
+  // Handle clicking on empty space to deselect
+  const handleBackgroundClick = () => {
+    selectNode(null);
   };
 
   const handlePointerOver = (event: any) => {
@@ -80,15 +139,35 @@ export function GalaxyNodes({ nodes, selectedNode }: GalaxyNodesProps) {
   }
 
   return (
-    <instancedMesh
-      ref={meshRef}
-      args={[undefined, undefined, nodes.length]}
-      onClick={handleClick}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
-    >
-      <sphereGeometry args={[1, 16, 16]} />
-      <meshPhongMaterial />
-    </instancedMesh>
+    <group>
+      {/* Main node spheres */}
+      <instancedMesh
+        ref={meshRef}
+        args={[undefined, undefined, nodes.length]}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshPhongMaterial />
+      </instancedMesh>
+      
+      {/* Glow effect spheres */}
+      <instancedMesh
+        ref={glowMeshRef}
+        args={[undefined, undefined, nodes.length]}
+        renderOrder={-1} // Render behind main spheres
+      >
+        <sphereGeometry args={[1, 12, 12]} />
+        <meshBasicMaterial 
+          transparent 
+          opacity={0.6}
+          blending={2} // Additive blending for glow effect
+          depthWrite={false} // Don't write to depth buffer for softer effect
+        />
+      </instancedMesh>
+      
+      {/* Note: Background click handled by galaxy visualization component */}
+    </group>
   );
 }

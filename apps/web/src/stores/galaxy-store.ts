@@ -5,6 +5,7 @@ interface GalaxyNode extends Concept {
   position: NodePosition;
   size: number;
   color: string;
+  highlighted?: boolean;
 }
 
 interface GalaxyEdge extends Edge {
@@ -38,6 +39,8 @@ interface GalaxyStore {
   selectNode: (nodeId: string | null) => void;
   hoverNode: (nodeId: string | null) => void;
   setSearchResults: (nodeIds: string[]) => void;
+  highlightSearchResults: (nodeIds: string[]) => void;
+  clearSearchHighlight: () => void;
   setCameraTarget: (target: [number, number, number]) => void;
   flyToNode: (nodeId: string) => void;
   setLoading: (loading: boolean) => void;
@@ -70,6 +73,28 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
   selectNode: (nodeId) => set({ selectedNode: nodeId }),
   hoverNode: (nodeId) => set({ hoveredNode: nodeId }),
   setSearchResults: (nodeIds) => set({ searchResults: nodeIds }),
+  highlightSearchResults: (nodeIds) => {
+    console.log('✨ Highlighting nodes:', nodeIds); // Debug log
+    set({ searchResults: nodeIds });
+    // Update nodes to show highlight state
+    set((state) => {
+      const updatedNodes = state.nodes.map(node => ({
+        ...node,
+        highlighted: nodeIds.includes(node.id)
+      }));
+      console.log('✨ Updated nodes with highlighting:', updatedNodes.filter(n => n.highlighted)); // Debug log
+      return { nodes: updatedNodes };
+    });
+  },
+  clearSearchHighlight: () => {
+    set({ searchResults: [] });
+    set((state) => ({
+      nodes: state.nodes.map(node => ({
+        ...node,
+        highlighted: false
+      }))
+    }));
+  },
   setCameraTarget: (target) => 
     set((state) => ({ 
       camera: { ...state.camera, target } 
@@ -79,16 +104,32 @@ export const useGalaxyStore = create<GalaxyStore>((set, get) => ({
 
   // Advanced Actions
   flyToNode: (nodeId) => {
+    console.log('🌌 FlyToNode called with:', nodeId);
     const { nodes } = get();
+    console.log('🌌 Available nodes:', nodes.map(n => ({ id: n.id, title: n.title })));
     const node = nodes.find(n => n.id === nodeId);
     if (node) {
+      console.log('🌌 Found node:', node.title, 'at position:', node.position);
+      // Calculate camera position offset from the node
+      const offset = 50; // Distance from the node
+      const cameraPosition: [number, number, number] = [
+        node.position.x + offset,
+        node.position.y + offset * 0.5,
+        node.position.z + offset
+      ];
+      
+      console.log('🌌 Setting camera to:', cameraPosition, 'targeting:', [node.position.x, node.position.y, node.position.z]);
+      
       set((state) => ({
         camera: {
           ...state.camera,
+          position: cameraPosition,
           target: [node.position.x, node.position.y, node.position.z],
         },
         selectedNode: nodeId,
       }));
+    } else {
+      console.error('🌌 Node not found:', nodeId);
     }
   },
 
