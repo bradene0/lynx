@@ -17,7 +17,7 @@ sys.path.append(str(project_root))
 
 from scripts.ingestion.wikipedia_ingester import WikipediaIngester
 from scripts.ingestion.arxiv_ingester import ArxivIngester
-from scripts.ingestion.embedding_generator import EmbeddingGenerator
+from scripts.ingestion.sbert_embedding_generator import SBERTEmbeddingGenerator
 from scripts.ingestion.graph_builder import GraphBuilder
 from scripts.ingestion.database import DatabaseManager
 
@@ -43,7 +43,7 @@ class IngestionPipeline:
         self.db = DatabaseManager()
         self.wikipedia_ingester = WikipediaIngester()
         self.arxiv_ingester = ArxivIngester()
-        self.embedding_generator = EmbeddingGenerator()
+        self.embedding_generator = SBERTEmbeddingGenerator()
         self.graph_builder = GraphBuilder()
         
     async def run_full_pipeline(self, target_concepts: int = 10000):

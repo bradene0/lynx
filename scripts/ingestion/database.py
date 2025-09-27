@@ -6,8 +6,15 @@ import os
 import logging
 import asyncio
 from typing import List, Dict, Any, Optional
-import psycopg2
-from psycopg2.extras import RealDictCursor, execute_values
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor, execute_values
+    USING_PSYCOPG2 = True
+except ImportError:
+    # Use psycopg3
+    import psycopg as psycopg2
+    from psycopg.rows import dict_row
+    USING_PSYCOPG2 = False
 import numpy as np
 from datetime import datetime
 
@@ -58,35 +65,57 @@ class DatabaseManager:
             
         with self.get_connection() as conn:
             with conn.cursor() as cur:
-                # Prepare data for batch insert
-                values = [
-                    (
-                        concept['id'],
-                        concept['title'],
-                        concept['summary'],
-                        concept['source'],
-                        concept['source_id'],
-                        concept['url'],
-                        concept.get('category')
+                if USING_PSYCOPG2:
+                    # Use psycopg2 execute_values
+                    values = [
+                        (
+                            concept['id'],
+                            concept['title'],
+                            concept['summary'],
+                            concept['source'],
+                            concept['source_id'],
+                            concept['url'],
+                            concept.get('category')
+                        )
+                        for concept in concepts
+                    ]
+                    
+                    execute_values(
+                        cur,
+                        """
+                        INSERT INTO concepts (id, title, summary, source, source_id, url, category)
+                        VALUES %s
+                        ON CONFLICT (id) DO UPDATE SET
+                            title = EXCLUDED.title,
+                            summary = EXCLUDED.summary,
+                            updated_at = NOW()
+                        """,
+                        values,
+                        template=None,
+                        page_size=1000
                     )
-                    for concept in concepts
-                ]
-                
-                # Use ON CONFLICT to handle duplicates
-                execute_values(
-                    cur,
-                    """
-                    INSERT INTO concepts (id, title, summary, source, source_id, url, category)
-                    VALUES %s
-                    ON CONFLICT (id) DO UPDATE SET
-                        title = EXCLUDED.title,
-                        summary = EXCLUDED.summary,
-                        updated_at = NOW()
-                    """,
-                    values,
-                    template=None,
-                    page_size=1000
-                )
+                else:
+                    # Use psycopg3 executemany
+                    for concept in concepts:
+                        cur.execute(
+                            """
+                            INSERT INTO concepts (id, title, summary, source, source_id, url, category)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (id) DO UPDATE SET
+                                title = EXCLUDED.title,
+                                summary = EXCLUDED.summary,
+                                updated_at = NOW()
+                            """,
+                            (
+                                concept['id'],
+                                concept['title'],
+                                concept['summary'],
+                                concept['source'],
+                                concept['source_id'],
+                                concept['url'],
+                                concept.get('category')
+                            )
+                        )
                 
                 conn.commit()
                 logger.info(f"Inserted/updated {len(concepts)} concepts")
@@ -99,30 +128,49 @@ class DatabaseManager:
             
         with self.get_connection() as conn:
             with conn.cursor() as cur:
-                # Prepare data for batch insert
-                values = [
-                    (
-                        embedding['id'],
-                        embedding['concept_id'],
-                        embedding['embedding'],  # numpy array will be converted to vector
-                        embedding.get('model', 'text-embedding-3-large')
+                if USING_PSYCOPG2:
+                    # Use psycopg2 execute_values
+                    values = [
+                        (
+                            embedding['id'],
+                            embedding['concept_id'],
+                            embedding['embedding'],  # numpy array will be converted to vector
+                            embedding.get('model', 'all-MiniLM-L6-v2')
+                        )
+                        for embedding in embeddings
+                    ]
+                    
+                    execute_values(
+                        cur,
+                        """
+                        INSERT INTO embeddings (id, concept_id, embedding, model)
+                        VALUES %s
+                        ON CONFLICT (id) DO UPDATE SET
+                            embedding = EXCLUDED.embedding,
+                            model = EXCLUDED.model
+                        """,
+                        values,
+                        template=None,
+                        page_size=100  # Smaller batches for large vectors
                     )
-                    for embedding in embeddings
-                ]
-                
-                execute_values(
-                    cur,
-                    """
-                    INSERT INTO embeddings (id, concept_id, embedding, model)
-                    VALUES %s
-                    ON CONFLICT (id) DO UPDATE SET
-                        embedding = EXCLUDED.embedding,
-                        model = EXCLUDED.model
-                    """,
-                    values,
-                    template=None,
-                    page_size=100  # Smaller batches for large vectors
-                )
+                else:
+                    # Use psycopg3 executemany
+                    for embedding in embeddings:
+                        cur.execute(
+                            """
+                            INSERT INTO embeddings (id, concept_id, embedding, model)
+                            VALUES (%s, %s, %s, %s)
+                            ON CONFLICT (id) DO UPDATE SET
+                                embedding = EXCLUDED.embedding,
+                                model = EXCLUDED.model
+                            """,
+                            (
+                                embedding['id'],
+                                embedding['concept_id'],
+                                embedding['embedding'],
+                                embedding.get('model', 'all-MiniLM-L6-v2')
+                            )
+                        )
                 
                 conn.commit()
                 logger.info(f"Inserted/updated {len(embeddings)} embeddings")

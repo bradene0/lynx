@@ -3,8 +3,13 @@ requests==2.31.0
 pandas==2.1.3
 numpy==1.25.2
 
-# OpenAI and embeddings
-openai==1.3.5
+# OpenAI and embeddings (optional for production)
+# openai==1.3.5
+
+# SBERT for local embeddings
+sentence-transformers==2.2.2
+torch>=1.9.0
+torchvision>=0.10.0
 
 # Database
 psycopg2-binary==2.9.9

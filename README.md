@@ -47,31 +47,40 @@ lynx/
    npm install
    ```
 
-2. **Start local database**:
-   ```bash
-   npm run docker:up
-   ```
-
-3. **Set up environment**:
+2. **Set up environment** (No OpenAI API key needed!):
    ```bash
    cp .env.example .env
-   # Edit .env with your OpenAI API key and other configs
+   # DATABASE_URL is auto-configured for local development
    ```
 
-4. **Run database migrations**:
+3. **Start local database**:
    ```bash
+   npm run docker:up
    npm run db:migrate
    ```
 
-5. **Start development server**:
+4. **Install Python dependencies**:
    ```bash
+   cd scripts/ingestion
+   pip install -r requirements.txt
+   cd ../..
+   ```
+
+5. **Quick test everything**:
+   ```bash
+   # Windows:
+   scripts\quick-test.bat
+   
+   # Or manually:
    npm run dev
    ```
 
-6. **Ingest initial data** (optional):
+6. **Test with sample data**:
    ```bash
-   npm run ingest
+   python scripts/test-ingestion.py
    ```
+
+📖 **Detailed setup instructions**: See [SETUP.md](SETUP.md)
 
 ## 📊 Data Sources
 
@@ -83,10 +92,12 @@ lynx/
 
 ### Phase 1: MVP (Current)
 - [x] Project structure and database schema
-- [ ] Data ingestion pipeline (Wikipedia + arXiv)
-- [ ] OpenAI embedding generation
-- [ ] Basic galaxy visualization
-- [ ] Semantic search functionality
+- [x] Data ingestion pipeline (Wikipedia + arXiv)
+- [x] SBERT embedding generation (local, $0 cost!)
+- [x] Basic galaxy visualization foundation
+- [x] Semantic search functionality
+- [ ] Enhanced Three.js galaxy rendering
+- [ ] Graph construction and layout
 
 ### Phase 2: Advanced Features
 - [ ] Pathfinding algorithms

@@ -13,34 +13,35 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
+    "@react-three/drei": "^9.88.0",
+    "@react-three/fiber": "^8.15.0",
+    "@tanstack/react-query": "^5.0.0",
+    "clsx": "^2.0.0",
+    "d3": "^7.8.5",
+    "dotenv": "^17.2.2",
+    "drizzle-orm": "^0.29.0",
     "next": "^14.0.0",
+    "openai": "^4.14.0",
+    "postgres": "^3.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "three": "^0.157.0",
-    "@react-three/fiber": "^8.15.0",
-    "@react-three/drei": "^9.88.0",
-    "d3": "^7.8.5",
-    "zustand": "^4.4.4",
-    "@tanstack/react-query": "^5.0.0",
-    "drizzle-orm": "^0.29.0",
-    "postgres": "^3.4.0",
-    "openai": "^4.14.0",
-    "clsx": "^2.0.0",
     "tailwind-merge": "^2.0.0",
-    "@heroicons/react": "^2.0.18"
+    "three": "^0.157.0",
+    "zustand": "^4.4.4"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.2",
     "@types/node": "^20.8.0",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
     "@types/three": "^0.157.0",
-    "@types/d3": "^7.4.2",
-    "typescript": "^5.2.2",
-    "tailwindcss": "^3.3.5",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.31",
+    "drizzle-kit": "^0.20.0",
     "eslint": "^8.51.0",
     "eslint-config-next": "^14.0.0",
-    "drizzle-kit": "^0.20.0"
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2"
   }
 }

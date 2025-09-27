@@ -21,7 +21,7 @@ export const concepts = pgTable('concepts', {
 export const embeddings = pgTable('embeddings', {
   id: text('id').primaryKey(),
   conceptId: text('concept_id').notNull().references(() => concepts.id, { onDelete: 'cascade' }),
-  embedding: vector('embedding', { dimensions: 3072 }).notNull(),
+  embedding: vector('embedding', { dimensions: 384 }).notNull(),
   model: text('model').notNull().default('text-embedding-3-large'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({

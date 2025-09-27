@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS concepts (
 CREATE TABLE IF NOT EXISTS embeddings (
     id TEXT PRIMARY KEY,
     concept_id TEXT NOT NULL REFERENCES concepts(id) ON DELETE CASCADE,
-    embedding vector(3072) NOT NULL,
+    embedding vector(384) NOT NULL,
     model TEXT NOT NULL DEFAULT 'text-embedding-3-large',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -21,7 +21,7 @@ export const generateId = (): string => {
 };
 
 // Constants
-export const EMBEDDING_DIMENSIONS = 3072;
+export const EMBEDDING_DIMENSIONS = 384; // SBERT all-MiniLM-L6-v2
 export const DEFAULT_KNN_K = 12;
 export const DEFAULT_SIMILARITY_THRESHOLD = 0.6;
 export const MAX_NEIGHBORS_PER_NODE = 20;
