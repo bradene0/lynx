@@ -6,6 +6,23 @@ import { eq, sql } from 'drizzle-orm';
 // Admin API to generate semantic edges
 export async function POST(request: NextRequest) {
   try {
+    // Admin authentication check
+    const adminKey = request.headers.get('x-admin-key');
+    if (!adminKey || adminKey !== process.env.ADMIN_API_KEY) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid admin key' },
+        { status: 401 }
+      );
+    }
+
+    // Verify admin key is set in environment
+    if (!process.env.ADMIN_API_KEY) {
+      console.error('ADMIN_API_KEY environment variable not set');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const clearExisting = searchParams.get('clear') === 'true';
     const threshold = parseFloat(searchParams.get('threshold') || '0.6');

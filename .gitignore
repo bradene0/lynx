@@ -125,3 +125,6 @@ venv.bak/
 # Logs
 logs/
 *.log
+
+
+SECURITY-FIXES.md
