@@ -32,11 +32,11 @@ interface LODSystemProps {
 
 // Default LOD configuration for 10K+ nodes
 const DEFAULT_LOD_LEVELS: LODLevel[] = [
-  { distance: 100, maxNodes: 500, minSize: 1.0 },      // Close: High detail
-  { distance: 300, maxNodes: 300, minSize: 1.2 },      // Medium: Balanced
-  { distance: 600, maxNodes: 150, minSize: 1.5 },      // Far: Low detail
-  { distance: 1200, maxNodes: 75, minSize: 2.0, clusterRadius: 50 }, // Very far: Clusters
-  { distance: Infinity, maxNodes: 30, minSize: 3.0, clusterRadius: 100 } // Extreme: Major clusters
+  { distance: 100, maxNodes: 600, minSize: 1.0 },      // Close: High detail
+  { distance: 300, maxNodes: 400, minSize: 1.2 },      // Medium: Balanced
+  { distance: 600, maxNodes: 250, minSize: 1.5 },      // Far: Low detail
+  { distance: 1200, maxNodes: 150, minSize: 2.0, clusterRadius: 50 }, // Very far: Clusters
+  { distance: Infinity, maxNodes: 75, minSize: 3.0, clusterRadius: 100 } // Extreme: Major clusters
 ];
 
 export function LODSystem({ 
@@ -150,21 +150,55 @@ export function LODSystem({
       const nodePos = new Vector3(node.position.x, node.position.y, node.position.z);
       const distance = cameraPos.distanceTo(nodePos);
       
-      // Enhanced scoring algorithm
+      // Enhanced scoring algorithm with better importance detection
       const distanceScore = Math.max(0, (2000 - distance) / 2000);
-      const importanceScore = node.importance || 0.5;
+      
+      // Calculate importance based on content and category
+      let importanceScore = node.importance || 0.5;
+      
+      // Boost importance for historically/academically significant terms
+      const title = node.title?.toLowerCase() || '';
+      const category = node.category?.toLowerCase() || '';
+      
+      // Historical importance indicators
+      if (title.includes('history of') || title.includes('ancient') || 
+          title.includes('civilization') || title.includes('empire') ||
+          title.includes('revolution') || title.includes('war')) {
+        importanceScore = Math.max(importanceScore, 0.8);
+      }
+      
+      // Scientific importance indicators  
+      if (title.includes('theory') || title.includes('principle') ||
+          title.includes('law') || title.includes('effect') ||
+          title.includes('equation') || title.includes('theorem')) {
+        importanceScore = Math.max(importanceScore, 0.8);
+      }
+      
+      // Geographic/geological importance
+      if (title.includes('volcanology') || title.includes('seismology') ||
+          title.includes('geology') || title.includes('geography')) {
+        importanceScore = Math.max(importanceScore, 0.7);
+      }
+      
+      // Academic paper bonus
+      const categoryBonus = category.includes('academic') ? 0.15 : 0;
+      
+      // Major domain bonus
+      const majorDomainBonus = ['history & philosophy', 'science & technology', 
+                               'mathematics & physics', 'life sciences & medicine'].includes(category) ? 0.1 : 0;
+      
       const sizeScore = Math.min(node.size / 3, 1);
-      const categoryBonus = node.category?.includes('Academic') ? 0.1 : 0;
       
       // Adaptive scoring based on LOD level
-      const distanceWeight = Math.max(0.4, 0.8 - lodLevel * 0.1);
-      const importanceWeight = Math.min(0.5, 0.2 + lodLevel * 0.1);
+      const distanceWeight = Math.max(0.3, 0.7 - lodLevel * 0.08);
+      const importanceWeight = Math.min(0.6, 0.3 + lodLevel * 0.08);
       
       const lodScore = 
         (distanceScore * distanceWeight) + 
         (importanceScore * importanceWeight) + 
-        (sizeScore * 0.2) + 
-        categoryBonus;
+        (sizeScore * 0.15) + 
+        categoryBonus + 
+        majorDomainBonus;
       
       return {
         ...node,
