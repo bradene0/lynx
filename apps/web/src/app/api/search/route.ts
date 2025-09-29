@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('query');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const threshold = parseFloat(searchParams.get('threshold') || '0.7');
 
     // Validate input
@@ -29,24 +29,41 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Perform simple text search (will upgrade to SBERT similarity later)
+    // Enhanced text search with better ranking
     const searchTerm = `%${validatedInput.query.toLowerCase()}%`;
+    const exactTerm = validatedInput.query.toLowerCase();
     
     const results = await db
       .select({
         concept: concepts,
         position: nodePositions,
-        similarity: sql<number>`1.0`, // Placeholder similarity score
+        similarity: sql<number>`
+          CASE 
+            WHEN LOWER(${concepts.title}) = ${exactTerm} THEN 1.0
+            WHEN LOWER(${concepts.title}) LIKE ${exactTerm} || '%' THEN 0.9
+            WHEN LOWER(${concepts.title}) LIKE '%' || ${exactTerm} || '%' THEN 0.8
+            WHEN LOWER(${concepts.summary}) LIKE '%' || ${exactTerm} || '%' THEN 0.6
+            ELSE 0.5
+          END
+        `, // Better similarity scoring
       })
       .from(concepts)
       .leftJoin(nodePositions, eq(concepts.id, nodePositions.conceptId))
       .where(
         or(
           ilike(concepts.title, searchTerm),
-          ilike(concepts.summary, searchTerm)
+          ilike(concepts.summary, searchTerm),
+          ilike(concepts.category, searchTerm)
         )
       )
-      .orderBy(desc(concepts.createdAt))
+      .orderBy(sql`
+        CASE 
+          WHEN LOWER(${concepts.title}) = ${exactTerm} THEN 1
+          WHEN LOWER(${concepts.title}) LIKE ${exactTerm} || '%' THEN 2
+          WHEN LOWER(${concepts.title}) LIKE '%' || ${exactTerm} || '%' THEN 3
+          ELSE 4
+        END
+      `)
       .limit(validatedInput.limit);
 
     const response: SearchResponse = {

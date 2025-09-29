@@ -14,7 +14,7 @@ export function SearchInterface() {
   const { data: searchResults, isLoading, error } = useQuery({
     queryKey: ['search', query],
     queryFn: async (): Promise<SearchResponse> => {
-      const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&limit=10`);
+      const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&limit=50`);
       if (!response.ok) {
         throw new Error('Search failed');
       }

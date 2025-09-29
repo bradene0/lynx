@@ -6,7 +6,7 @@ import { desc, sql, eq } from 'drizzle-orm';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '1000'); // Increased to show all concepts
+    const limit = parseInt(searchParams.get('limit') || '10000'); // Support 10K concepts
     const offset = parseInt(searchParams.get('offset') || '0');
     
     // Spatial query parameters for LOD

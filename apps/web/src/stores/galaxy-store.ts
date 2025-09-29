@@ -44,6 +44,10 @@ interface GalaxyStore {
   setEdgeThreshold: (threshold: 'high' | 'medium' | 'low') => void;
   flyToNode: (nodeId: string) => void;
   
+  // Search Operations
+  highlightSearchResults: (nodeIds: string[]) => void;
+  clearSearchHighlight: () => void;
+  
   // Galaxy Operations
   showWormholes: (nodeId: string) => void;
   resetView: () => void;

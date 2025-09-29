@@ -19,18 +19,51 @@ interface GalaxyNode extends Concept {
 
 // Enhanced color mapping with richer, more vibrant colors
 const CATEGORY_COLORS = {
-  'Science & Technology': '#00D4FF', // Bright Cyan - innovation
-  'History': '#FFB000',              // Rich Gold - ancient wisdom
-  'Arts & Culture': '#FF1493',       // Deep Pink - creativity
-  'Philosophy & Religion': '#9932CC', // Dark Orchid - mystical
-  'Geography': '#00FF7F',            // Spring Green - nature
-  'General': '#87CEEB',              // Sky Blue - neutral
-  'Physics': '#FF6347',              // Tomato Red - energy
-  'Biology': '#32CD32',              // Lime Green - life
-  'Mathematics': '#1E90FF',          // Dodger Blue - logic
-  'Computer Science': '#00FFFF',     // Aqua - digital
-  'Medicine': '#DC143C',             // Crimson - health
-  'Engineering': '#FF8C00',          // Dark Orange - construction
+  // Main Wikipedia categories (1000+ concepts each)
+  'Science & Technology': '#00D4FF',        // Bright Cyan - innovation
+  'History & Philosophy': '#FFB000',        // Rich Gold - ancient wisdom  
+  'Arts & Culture': '#FF1493',             // Deep Pink - creativity
+  'Life Sciences & Medicine': '#32CD32',   // Lime Green - life
+  'Mathematics & Physics': '#FF6347',      // Tomato Red - energy
+  'Social Sciences & Economics': '#9932CC', // Dark Orchid - social
+  
+  // Secondary categories (50-100 concepts each)
+  'Life Sciences': '#90EE90',              // Light Green - biology
+  'Philosophy & Religion': '#DDA0DD',      // Plum - mystical
+  'Arts & Literature': '#FF69B4',          // Hot Pink - artistic
+  'Social Sciences': '#BA55D3',            // Medium Orchid - social
+  'Physical Sciences': '#FFA500',          // Orange - physics
+  'History & Culture': '#DAA520',          // Goldenrod - historical
+  'Mathematics & Logic': '#1E90FF',        // Dodger Blue - logic
+  'General': '#87CEEB',                    // Sky Blue - neutral
+  
+  // Academic arXiv categories (80-100 concepts each)
+  'Academic - Artificial Intelligence': '#00FFFF',     // Aqua - AI
+  'Academic - Machine Learning': '#00CED1',            // Dark Turquoise - ML
+  'Academic - Computer Vision': '#48D1CC',             // Medium Turquoise - vision
+  'Academic - Computational Linguistics': '#20B2AA',  // Light Sea Green - NLP
+  'Academic - Robotics': '#5F9EA0',                    // Cadet Blue - robotics
+  'Academic - Cryptography and Security': '#708090',  // Slate Gray - security
+  'Academic - Databases': '#778899',                   // Light Slate Gray - data
+  'Academic - Data Structures and Algorithms': '#696969', // Dim Gray - algorithms
+  
+  // Physics & Math academic
+  'Academic - Quantum Physics': '#FF4500',            // Orange Red - quantum
+  'Academic - General Physics': '#FF6347',            // Tomato - physics
+  'Academic - Condensed Matter': '#CD5C5C',           // Indian Red - matter
+  'Academic - Astrophysics': '#DC143C',               // Crimson - space
+  'Academic - Number Theory': '#4169E1',              // Royal Blue - numbers
+  'Academic - Algebraic Geometry': '#0000FF',         // Blue - geometry
+  'Academic - Combinatorics': '#6495ED',              // Cornflower Blue - combinatorics
+  
+  // Life Sciences academic
+  'Academic - Biomolecules': '#228B22',               // Forest Green - bio
+  'Academic - Genomics': '#32CD32',                   // Lime Green - genetics
+  'Academic - Neurons and Cognition': '#9ACD32',     // Yellow Green - neuro
+  
+  // Economics academic
+  'Academic - Theoretical Economics': '#FFD700',      // Gold - economics
+  'Academic - Machine Learning Statistics': '#FFA500', // Orange - stats
 } as const;
 
 export function useGalaxyData() {
@@ -61,12 +94,18 @@ export function useGalaxyData() {
       }
       const positions: NodePosition[] = await positionsResponse.json();
 
-      // Fetch edges
-      const edgesResponse = await fetch('/api/edges');
-      if (!edgesResponse.ok) {
-        throw new Error('Failed to fetch edges');
+      // Fetch edges (handle gracefully if none exist)
+      let edges: Edge[] = [];
+      try {
+        const edgesResponse = await fetch('/api/edges');
+        if (edgesResponse.ok) {
+          edges = await edgesResponse.json();
+        } else {
+          console.warn('No edges available yet - this is normal for new installations');
+        }
+      } catch (error) {
+        console.warn('Edges API not available:', error);
       }
-      const edges: Edge[] = await edgesResponse.json();
 
       return { concepts, positions, edges };
     },
@@ -88,6 +127,8 @@ export function useGalaxyData() {
     }
 
     if (galaxyData) {
+      console.log(`🔍 Debug: ${galaxyData.concepts.length} concepts, ${galaxyData.positions.length} positions, ${galaxyData.edges.length} edges`);
+      
       // Create position lookup
       const positionMap = new Map(
         galaxyData.positions.map(pos => [pos.concept_id, pos])
@@ -96,7 +137,10 @@ export function useGalaxyData() {
       const galaxyNodes: GalaxyNode[] = galaxyData.concepts
         .map(concept => {
           const position = positionMap.get(concept.id);
-          if (!position) return null;
+          if (!position) {
+            console.warn(`⚠️ No position found for concept: ${concept.title}`);
+            return null;
+          }
 
           // Calculate importance based on connections (we'll update this when we have more data)
         const baseSize = 1.2;
@@ -120,6 +164,8 @@ export function useGalaxyData() {
         visible: true, // All edges visible by default
       }));
 
+      console.log(`✅ Final result: ${galaxyNodes.length} visible nodes, ${galaxyEdges.length} edges`);
+      
       setNodes(galaxyNodes);
       setEdges(galaxyEdges);
       setLoading(false);

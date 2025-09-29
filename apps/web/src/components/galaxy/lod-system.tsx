@@ -178,6 +178,8 @@ export function LODSystem({
       .sort((a, b) => b.lodScore - a.lodScore)
       .slice(0, Math.min(currentLod.maxNodes, maxNodes));
     
+    console.log(`🎯 LOD Level ${lodLevel}: ${finalNodes.length}/${workingNodes.length} nodes visible (camera distance: ${cameraDistance.toFixed(1)})`);
+    
     return {
       visibleNodes: finalNodes,
       currentLodLevel: lodLevel

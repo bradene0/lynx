@@ -5,7 +5,7 @@ import { nodePositions } from '@/lib/schema';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '1000');
+    const limit = parseInt(searchParams.get('limit') || '10000');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Fetch node positions

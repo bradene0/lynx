@@ -93,8 +93,13 @@ export function GalaxyVisualization() {
       <CameraController />
 
       {/* Galaxy Components with LOD */}
-      <LODSystem nodes={nodes} maxNodes={200}>
-        {(visibleNodes) => (
+      <LODSystem 
+        nodes={nodes} 
+        maxNodes={1000}
+        enableFrustumCulling={true}
+        enableClustering={true}
+      >
+        {(visibleNodes, lodLevel) => (
           <>
             <GalaxyNodes nodes={visibleNodes} selectedNode={selectedNode} nodeClickedRef={nodeClickedRef} />
             <GalaxyEdges edges={edges} nodes={visibleNodes} />
