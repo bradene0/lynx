@@ -321,55 +321,90 @@ class LargeScaleIngestion:
         return papers
 
     async def generate_positions(self, concepts: List[Dict]) -> List[Dict]:
-        """Generate 3D positions using improved distribution"""
-        logger.info("🌌 Generating 3D galaxy positions...")
+        """Generate 3D positions using improved random distribution"""
+        logger.info("🌌 Generating 3D galaxy positions with improved distribution...")
+        
+        import random
+        import math
         
         positions = []
+        galaxy_radius = 200
+        core_radius = 50
+        halo_radius = 300
         
-        # Create domain-based clustering
-        domain_centers = {
-            'Science & Technology': (0, 0, 0),
-            'Mathematics & Logic': (100, 0, 0),
-            'History & Culture': (-100, 0, 0),
-            'Arts & Literature': (0, 100, 0),
-            'Philosophy & Religion': (0, -100, 0),
-            'Social Sciences': (50, 50, 0),
-            'Life Sciences': (-50, 50, 0),
-            'Physical Sciences': (0, 0, 100),
-            'Academic - Artificial Intelligence': (150, 0, 0),
-            'Academic - Machine Learning': (140, 10, 0),
-            'Academic - Computer Vision': (130, 20, 0),
-            'Academic - Computational Linguistics': (120, 30, 0),
-            'Academic - Robotics': (110, 40, 0),
-            'Academic - Cryptography and Security': (100, 50, 0),
-            'Academic - General Physics': (0, 0, 120),
-            'Academic - Quantum Physics': (10, 0, 110),
-            'Academic - Astrophysics': (20, 0, 100),
-            'Academic - Condensed Matter': (30, 0, 90),
-        }
+        def generate_spherical_position():
+            """Generate random position using spherical coordinates for uniform distribution"""
+            u = random.uniform(0, 1)
+            v = random.uniform(0, 1)
+            
+            theta = 2 * math.pi * u  # Azimuthal angle
+            phi = math.acos(2 * v - 1)  # Polar angle
+            
+            # Galaxy-like radius distribution
+            rand = random.random()
+            if rand < 0.3:  # 30% in dense core
+                radius = random.uniform(10, core_radius)
+            elif rand < 0.8:  # 50% in main galaxy
+                radius = random.uniform(core_radius, galaxy_radius)
+            else:  # 20% in outer halo
+                radius = random.uniform(galaxy_radius, halo_radius)
+            
+            # Convert to Cartesian
+            x = radius * math.sin(phi) * math.cos(theta)
+            y = radius * math.sin(phi) * math.sin(theta)
+            z = radius * math.cos(phi)
+            
+            return x, y, z
         
-        for concept in concepts:
+        def generate_clustered_position(category: str, index: int):
+            """Generate position with loose category clustering but still random"""
+            # Loose category regions (much more spread out than before)
+            category_regions = {
+                'Science & Technology': (0, 0, 0),
+                'Mathematics & Logic': (80, 60, 20),
+                'History & Culture': (-70, 50, -30),
+                'Arts & Literature': (60, -80, 40),
+                'Philosophy & Religion': (-90, -60, -20),
+                'Social Sciences': (40, 90, 30),
+                'Life Sciences': (-60, -90, 50),
+                'Physical Sciences': (90, 30, -40),
+            }
+            
+            # Get base region or use random
+            base_region = category_regions.get(category, (0, 0, 0))
+            
+            # Add large random variation for natural distribution
+            variation = 120  # Much larger than before
+            x = base_region[0] + random.uniform(-variation, variation)
+            y = base_region[1] + random.uniform(-variation, variation)
+            z = base_region[2] + random.uniform(-variation/2, variation/2)
+            
+            return x, y, z
+        
+        for i, concept in enumerate(concepts):
             category = concept['category']
             
-            # Get domain center or use default
-            center = domain_centers.get(category, (0, 0, 0))
-            
-            # Add random variation around center
-            import random
-            x = center[0] + random.uniform(-30, 30)
-            y = center[1] + random.uniform(-30, 30) 
-            z = center[2] + random.uniform(-30, 30)
+            # Use mixed distribution methods for natural randomness
+            rand = random.random()
+            if rand < 0.6:  # 60% spherical (most natural)
+                x, y, z = generate_spherical_position()
+            else:  # 40% loosely clustered
+                x, y, z = generate_clustered_position(category, i)
             
             position = {
                 'concept_id': concept['id'],
-                'x': x,
-                'y': y,
-                'z': z,
+                'x': float(x),
+                'y': float(y),
+                'z': float(z),
                 'cluster_id': category.replace(' ', '_').lower()
             }
             positions.append(position)
         
-        logger.info(f"✅ Generated {len(positions)} positions")
+        logger.info(f"✅ Generated {len(positions)} positions with improved distribution")
+        logger.info(f"   • Galaxy radius: {galaxy_radius}")
+        logger.info(f"   • Core radius: {core_radius}")
+        logger.info(f"   • Distribution: 60% spherical, 40% loosely clustered")
+        
         return positions
 
     async def run_large_scale_ingestion(self):
