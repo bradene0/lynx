@@ -49,7 +49,7 @@ const fragmentShader = `
   varying vec3 vColor;
   
   void main() {
-    gl_FragColor = vec4(vColor, 0.15); // Very transparent
+    gl_FragColor = vec4(vColor, 0.4); // More visible
   }
 `;
 
@@ -58,17 +58,20 @@ export function GalaxyEdges({ edges, nodes }: GalaxyEdgesProps) {
   const { edgeThreshold } = useGalaxyStore();
   
   const { geometry, material } = useMemo(() => {
-    // Filter edges based on threshold level
+    // Filter edges based on threshold level (SBERT similarity ranges)
     const thresholdMap = {
-      'high': 0.25,
-      'medium': 0.15,
-      'low': 0.05
+      'high': 0.7,    // Very strong semantic similarity
+      'medium': 0.5,  // Moderate semantic similarity  
+      'low': 0.3      // Weak but meaningful similarity
     };
     
     const minWeight = thresholdMap[edgeThreshold];
     const visibleEdges = edges.filter(edge => edge.weight >= minWeight);
     
+    console.log(`🔗 Edge Debug: ${edges.length} total edges, ${visibleEdges.length} visible (threshold: ${edgeThreshold} = ${minWeight})`);
+    
     if (visibleEdges.length === 0 || nodes.length === 0) {
+      console.warn(`⚠️ No edges to render: ${visibleEdges.length} edges, ${nodes.length} nodes`);
       return { geometry: null, material: null };
     }
 
@@ -118,6 +121,7 @@ export function GalaxyEdges({ edges, nodes }: GalaxyEdgesProps) {
     });
 
     if (segmentPoints.length === 0) {
+      console.warn(`⚠️ No segment points generated from ${visibleEdges.length} edges`);
       return { geometry: null, material: null };
     }
 
@@ -130,9 +134,11 @@ export function GalaxyEdges({ edges, nodes }: GalaxyEdgesProps) {
       fragmentShader,
       transparent: true,
       depthWrite: false,
+      depthTest: true,
       blending: 2, // Additive blending for glow effect
     });
 
+    console.log(`✅ Edge geometry created: ${segmentPoints.length} points, ${visibleEdges.length} edges`);
     return { geometry, material };
   }, [edges, nodes, edgeThreshold]);
   
@@ -140,7 +146,7 @@ export function GalaxyEdges({ edges, nodes }: GalaxyEdgesProps) {
   useFrame((state) => {
     if (materialRef.current) {
       // Very subtle opacity breathing effect
-      const opacity = 0.15 + Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
+      const opacity = 0.4 + Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
       materialRef.current.uniforms = materialRef.current.uniforms || {};
     }
   });

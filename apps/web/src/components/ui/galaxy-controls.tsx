@@ -49,17 +49,20 @@ export function GalaxyControls() {
           <div className="text-xs text-galaxy-white/50 bg-galaxy-dark/30 rounded-lg p-3">
             <div className="flex items-center space-x-2 mb-2">
               <SparklesIcon className="h-3 w-3" />
-              <span className="font-medium">Knowledge Universe</span>
+              <span className="font-medium">Knowledge Galaxy</span>
             </div>
             <div className="space-y-1">
-              <div>📚 54+ Concepts</div>
-              <div>🔬 8 Knowledge Domains</div>
-              <div>🧠 SBERT Embeddings</div>
-              <div>⚡ LOD System Active</div>
+              <div>📚 9,422 Concepts</div>
+              <div>🔬 34 Knowledge Domains</div>
+              <div>🧠 SBERT Embeddings (384D)</div>
+              <div>⚡ LOD System (5 Levels)</div>
+              <div>🔗 Semantic Connections</div>
             </div>
             <div className="mt-2 pt-2 border-t border-galaxy-white/10">
               <div className="text-xs text-galaxy-white/40">
-                Showing top 200 by relevance
+                {edgeThreshold === 'high' && 'Showing strongest connections (>0.7 similarity)'}
+                {edgeThreshold === 'medium' && 'Showing moderate connections (>0.5 similarity)'}
+                {edgeThreshold === 'low' && 'Showing all connections (>0.3 similarity)'}
               </div>
             </div>
           </div>
