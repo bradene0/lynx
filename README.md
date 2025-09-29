@@ -12,25 +12,11 @@ LYNX represents the cutting edge of knowledge visualization, combining semantic 
 
 ## 📸 Visual Showcase
 
-<!-- Add your screenshots and videos here -->
-
 ### 🎥 Demo Videos
-- **[Full Demo Video]** - Complete walkthrough of LYNX features *(Add your video link)*
-- **[Galaxy Navigation]** - Smooth 3D exploration in action *(Add your video link)*
-- **[Search & Discovery]** - Semantic search capabilities *(Add your video link)*
+- **[[Full Demo Video](https://youtu.be/S0obbLW1B8w)]** - Complete walkthrough of LYNX features *(Add your video link)*
 
 ### 📷 Screenshots
-![LYNX Galaxy Overview](docs/images/galaxy-overview.png) *(Add your screenshot)*
-*The complete knowledge galaxy with 678+ interconnected concepts*
-
-![Search Interface](docs/images/search-interface.png) *(Add your screenshot)*
-*Intelligent semantic search with real-time results*
-
-![Concept Details](docs/images/concept-details.png) *(Add your screenshot)*
-*Rich concept information with related connections*
-
-![Admin Dashboard](docs/images/admin-dashboard.png) *(Add your screenshot)*
-*Powerful admin tools for data management*
+![LYNX image 2](docs/images/lynxv1-github2.png)
 
 ---
 
