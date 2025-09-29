@@ -13,7 +13,7 @@ LYNX represents the cutting edge of knowledge visualization, combining semantic 
 ## 📸 Visual Showcase
 
 ### 🎥 Demo Videos
-- **[[Full Demo Video](https://youtu.be/S0obbLW1B8w)]** - Complete walkthrough of LYNX features *(Add your video link)*
+- **[[Full Demo Video](https://youtu.be/S0obbLW1B8w)]** - Complete walkthrough of LYNX features
 
 ### 📷 Screenshots
 ![LYNX image 2](docs/images/lynxv1-github2.png)
@@ -418,18 +418,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **arXiv Papers** - Available under various open access licenses
 - **Generated Embeddings** - Derived from public domain content
 
-### **Contact & Support**
-For questions, suggestions, or collaboration opportunities:
-
-- **GitHub Issues** - Report bugs or request features
-- **Email** - [your-email@example.com] *(Add your contact)*
-- **LinkedIn** - [Your LinkedIn Profile] *(Add your profile)*
-- **Portfolio** - [Your Portfolio Website] *(Add your website)*
-
 ---
-
-**Built with ❤️ for the exploration of human knowledge**
-
-*LYNX - Where Knowledge Becomes Adventure* 🚀✨
-
-*Last Updated: September 2024*
