@@ -1,35 +1,45 @@
 """
-OpenAI embedding generation for LYNX concepts
+SBERT embedding generation for LYNX concepts
+Uses sentence-transformers locally (no API costs)
 """
 
 import asyncio
 import logging
 import os
 from typing import List, Dict, Any
-import openai
 import numpy as np
 import hashlib
 from tqdm import tqdm
 import time
+
+try:
+    from sentence_transformers import SentenceTransformer
+    SBERT_AVAILABLE = True
+except ImportError:
+    SBERT_AVAILABLE = False
+    logging.warning("sentence-transformers not available. Install with: pip install sentence-transformers")
 
 from scripts.ingestion.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
 class EmbeddingGenerator:
-    """Generates embeddings for concepts using OpenAI API"""
+    """Generates embeddings for concepts using SBERT locally"""
     
     def __init__(self):
-        self.client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        self.model = 'text-embedding-3-large'
-        self.dimensions = 3072
-        self.batch_size = 100  # Process in batches to manage API limits
-        self.rate_limit_delay = 0.1  # 100ms between requests
+        if not SBERT_AVAILABLE:
+            raise ImportError("sentence-transformers is required. Install with: pip install sentence-transformers")
+        
+        # Use the same model as mentioned in memory
+        self.model_name = 'all-MiniLM-L6-v2'
+        self.model = SentenceTransformer(self.model_name)
+        self.dimensions = 384  # all-MiniLM-L6-v2 produces 384-dimensional embeddings
+        self.batch_size = 32  # Optimal batch size for SBERT
         self.db = DatabaseManager()
         
     def generate_embedding_id(self, concept_id: str) -> str:
         """Generate a unique embedding ID"""
-        content = f"embedding:{concept_id}:{self.model}"
+        content = f"embedding:{concept_id}:{self.model_name}"
         return hashlib.md5(content.encode()).hexdigest()
     
     def prepare_text_for_embedding(self, concept: Dict[str, Any]) -> str:
@@ -53,45 +63,32 @@ class EmbeddingGenerator:
         
         combined_text = ' | '.join(text_parts)
         
-        # Truncate if too long (OpenAI has token limits)
-        max_chars = 8000  # Conservative limit
+        # Truncate if too long (SBERT handles up to 512 tokens well)
+        max_chars = 2000  # Conservative limit for SBERT
         if len(combined_text) > max_chars:
             combined_text = combined_text[:max_chars] + "..."
         
         return combined_text
     
-    async def generate_single_embedding(self, text: str) -> np.ndarray:
-        """Generate embedding for a single text"""
+    def generate_embedding(self, text: str) -> np.ndarray:
+        """Generate embedding for a single text using SBERT"""
         try:
-            response = self.client.embeddings.create(
-                model=self.model,
-                input=text,
-                dimensions=self.dimensions
-            )
-            
-            embedding = np.array(response.data[0].embedding, dtype=np.float32)
-            return embedding
+            # SBERT encode method returns numpy array directly
+            embedding = self.model.encode(text, convert_to_numpy=True)
+            return embedding.astype(np.float32)
             
         except Exception as e:
             logger.error(f"Error generating embedding: {e}")
             raise
     
-    async def generate_batch_embeddings(self, texts: List[str]) -> List[np.ndarray]:
-        """Generate embeddings for a batch of texts"""
+    def generate_batch_embeddings(self, texts: List[str]) -> List[np.ndarray]:
+        """Generate embeddings for a batch of texts using SBERT"""
         try:
-            # OpenAI API can handle multiple inputs in one request
-            response = self.client.embeddings.create(
-                model=self.model,
-                input=texts,
-                dimensions=self.dimensions
-            )
+            # SBERT can handle batch processing efficiently
+            embeddings = self.model.encode(texts, convert_to_numpy=True, batch_size=self.batch_size)
             
-            embeddings = []
-            for data in response.data:
-                embedding = np.array(data.embedding, dtype=np.float32)
-                embeddings.append(embedding)
-            
-            return embeddings
+            # Convert to list of individual arrays
+            return [embedding.astype(np.float32) for embedding in embeddings]
             
         except Exception as e:
             logger.error(f"Error generating batch embeddings: {e}")
@@ -126,8 +123,8 @@ class EmbeddingGenerator:
                 
                 logger.info(f"Generating embeddings for batch {i//self.batch_size + 1}/{(len(concepts_to_process) + self.batch_size - 1)//self.batch_size}")
                 
-                # Generate embeddings
-                embeddings = await self.generate_batch_embeddings(texts)
+                # Generate embeddings (SBERT is synchronous)
+                embeddings = self.generate_batch_embeddings(texts)
                 
                 # Create embedding records
                 batch_embeddings = []
@@ -136,7 +133,7 @@ class EmbeddingGenerator:
                         'id': self.generate_embedding_id(concept['id']),
                         'concept_id': concept['id'],
                         'embedding': embedding.tolist(),  # Convert to list for JSON storage
-                        'model': self.model
+                        'model': self.model_name
                     }
                     batch_embeddings.append(embedding_record)
                 
@@ -147,8 +144,8 @@ class EmbeddingGenerator:
                 processed += len(batch)
                 logger.info(f"Processed {processed}/{len(concepts_to_process)} concepts")
                 
-                # Rate limiting
-                await asyncio.sleep(self.rate_limit_delay)
+                # Small delay for database (no API rate limiting needed)
+                await asyncio.sleep(0.01)
                 
             except Exception as e:
                 logger.error(f"Error processing batch {i//self.batch_size + 1}: {e}")
